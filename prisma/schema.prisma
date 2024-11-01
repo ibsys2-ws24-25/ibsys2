@@ -18,15 +18,15 @@ model Material {
   name                String                @default("")
   itemValue           Float
   defaultStock        Int                   @default(100)
-  materialsRequiredBy MaterialRequirement[] @relation("MaterialToRequirements")
-  materialsRequired   MaterialRequirement[] @relation("RequirementToMaterial")
+  MaterialsRequired   MaterialRequirement[] @relation("RequirementToMaterial") // Materialien, die dieses Material benötigt
+  MaterialsRequiredBy MaterialRequirement[] @relation("MaterialToRequirements") // Materialien, die dieses Material benötigen
 }
 
 model MaterialRequirement {
-  id                  Int      @id @default(autoincrement())
-  materialId          String
-  requiredMaterialId  String
-  Material            Material @relation("MaterialToRequirements", fields: [materialId], references: [id])
-  RequiredMaterial    Material @relation("RequirementToMaterial", fields: [requiredMaterialId], references: [id])
-  sum                 Int      @default(1)
+  id                 Int      @id @default(autoincrement())
+  materialId         String
+  requiredMaterialId String
+  Material           Material @relation("RequirementToMaterial", fields: [materialId], references: [id]) // Material, das dieses Material benötigt
+  RequiredMaterial   Material @relation("MaterialToRequirements", fields: [requiredMaterialId], references: [id]) // Material, das benötigt wird
+  sum                Int      @default(1)
 }

@@ -2,13 +2,13 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-Start the development database server:
+First run the development database:
 
 ```bash
 docker compose -f compose/db/compose.yml up -d
 ```
 
-Open [http://localhost:5050](http://localhost:5050) with your browser to see the pgadmin panel.
+Open [http://localhost:5050](http://localhost:5050) with your browser to see the pgadmin login page.
 
 Run the development server:
 

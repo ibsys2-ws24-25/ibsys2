@@ -12,3 +12,21 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Material {
+  id                  String                @id
+  name                String                @default("")
+  itemValue           Float
+  defaultStock        Int                   @default(100)
+  materialsRequiredBy MaterialRequirement[] @relation("MaterialToRequirements")
+  materialsRequired   MaterialRequirement[] @relation("RequirementToMaterial")
+}
+
+model MaterialRequirement {
+  id                  Int      @id @default(autoincrement())
+  materialId          String
+  requiredMaterialId  String
+  Material            Material @relation("MaterialToRequirements", fields: [materialId], references: [id])
+  RequiredMaterial    Material @relation("RequirementToMaterial", fields: [requiredMaterialId], references: [id])
+  sum                 Int      @default(1)
+}

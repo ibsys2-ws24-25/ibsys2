@@ -2,7 +2,7 @@
 
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { Prisma, Warehouse } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { useState } from "react";
 
 type WarehouseWithRelations = Prisma.WarehouseGetPayload<{

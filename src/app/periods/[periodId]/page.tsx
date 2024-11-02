@@ -1,7 +1,7 @@
 import CreateWarehouseStock from "@/components/pages/periods/view/CreateWarehouseStock";
 import WarehouseChart from "@/components/pages/periods/view/WarehouseChart";
 import WarehouseTable from "@/components/pages/periods/view/WarehouseTable";
-import { Prisma, Warehouse } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { Metadata } from "next";
 
 async function getPeriod(id: number) {

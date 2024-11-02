@@ -10,6 +10,7 @@ export default function Navbar() {
             {/* Navigation Links */}
             <div className="flex space-x-6">
                 <Link className="hover:text-gray-400" href="/bill-of-materials">Bill of Materials</Link>
+                <Link className="hover:text-gray-400" href="/periods">Periods</Link>
             </div>
         </div>
     );

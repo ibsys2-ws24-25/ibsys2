@@ -20,6 +20,8 @@ model Material {
   defaultStock        Int                   @default(100)
   MaterialsRequired   MaterialRequirement[] @relation("RequirementToMaterial") // Materialien, die dieses Material benötigt
   MaterialsRequiredBy MaterialRequirement[] @relation("MaterialToRequirements") // Materialien, die dieses Material benötigen
+  Warehouse           Warehouse[]
+  Forecast            Forecast[]
 }
 
 model MaterialRequirement {
@@ -29,4 +31,29 @@ model MaterialRequirement {
   Material           Material @relation("RequirementToMaterial", fields: [materialId], references: [id]) // Material, das dieses Material benötigt
   RequiredMaterial   Material @relation("MaterialToRequirements", fields: [requiredMaterialId], references: [id]) // Material, das benötigt wird
   sum                Int      @default(1)
+}
+
+model Period {
+  id        Int         @id
+  created   DateTime    @default(now())
+  Warehouse Warehouse[]
+  Forecast  Forecast[]
+}
+
+model Warehouse {
+  id         Int      @id @default(autoincrement())
+  Period     Period   @relation(fields: [periodId], references: [id])
+  Material   Material @relation(fields: [materialId], references: [id])
+  amount     Int
+  periodId   Int
+  materialId String
+}
+
+model Forecast {
+  id         Int      @id @default(autoincrement())
+  Period     Period   @relation(fields: [periodId], references: [id])
+  Material   Material @relation(fields: [materialId], references: [id])
+  forPeriod  Int
+  periodId   Int
+  materialId String
 }

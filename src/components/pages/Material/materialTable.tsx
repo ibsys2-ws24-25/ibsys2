@@ -7,7 +7,7 @@ import { tableData } from "@/app/MaterialP1/p1MockData";
 const MaterialTable = () => {
     return (
         <div className="overflow-x-auto">
-            <Table className="w-4/5 border-collapse">
+            <Table className="w-4/5 border-collapse justify-self-end">
                 <TableHeader>
                     <TableRow>
                         <TableHead>Item No.</TableHead>
@@ -24,28 +24,28 @@ const MaterialTable = () => {
                     {tableData.map((row, index) => (
                         <TableRow key={index} className="border-t">
                             <TableCell>
-                                <Input type="text" defaultValue={row.itemNo} disabled className="text-center"/>
+                                {row.itemNo}
                             </TableCell>
                             <TableCell>
-                                <Input type="number" defaultValue={row.salesOrders} className="text-center"/>
+                                {row.salesOrders}
                             </TableCell>
                             <TableCell>
-                                <Input type="number" defaultValue={row.safetyStock} className="text-center"/>
+                                <Input type="number" defaultValue={row.safetyStock} className="text-center w-full"/>
                             </TableCell>
                             <TableCell>
-                                <Input type="number" defaultValue={row.warehouseStock} className="text-center"/>
+                                {row.warehouseStock}
                             </TableCell>
                             <TableCell>
-                                <Input type="number" defaultValue={row.queueOrders} className="text-center"/>
+                                {row.queueOrders}
                             </TableCell>
                             <TableCell>
-                                <Input type="number" defaultValue={row.workInProgress} className="text-center"/>
+                                {row.workInProgress}
                             </TableCell>
                             <TableCell>
-                                <Input type="number" defaultValue={row.productionOrders} className="text-center"/>
+                                {row.productionOrders}
                             </TableCell>
                             <TableCell>
-                                <Input type="text" defaultValue={row.description} disabled className="text-center"/>
+                                {row.description}
                             </TableCell>
                         </TableRow>
                     ))}

@@ -1,13 +1,7 @@
-import CreatePeriod from "@/components/pages/periods/CreatePeriod";
-import LinkTable from "@/components/pages/periods/linkTable"
-
-export default async function PeriodViewPage({ params }: { params: { periodId: number } }) {
-    console.log(params);
-    
+export default async function PeriodViewPage({ params }: { params: { periodId: number } }) {    
     return (
         <div>
-            <CreatePeriod />
-            <LinkTable/>
+            <h1 className="text-2xl font-bold mb-4 text-primary">Overview of Period {params.periodId}</h1>
         </div>
     );
 }

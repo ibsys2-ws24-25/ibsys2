@@ -1,6 +1,7 @@
 import CreateWarehouseStock from "@/components/pages/periods/view/CreateWarehouseStock";
 import WarehouseTable from "@/components/pages/periods/view/WarehouseTable";
 import { Prisma, Warehouse } from '@prisma/client';
+import { Metadata } from "next";
 
 async function getPeriod(id: number) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${id}`, {
@@ -27,6 +28,10 @@ type PeriodWithRelations = Prisma.PeriodGetPayload<{
         },
     };
 }>;
+
+export const metadata: Metadata = {
+    title: 'Period overview',
+};
 
 export default async function PeriodViewPage({ params }: { params: { periodId: number } }) {
     const period: PeriodWithRelations = await getPeriod(Number(params.periodId));

@@ -1,5 +1,3 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 ## Getting Started
 
 First run the development database:
@@ -9,6 +7,18 @@ docker compose -f compose/db/compose.yml up -d
 ```
 
 Open [http://localhost:5050](http://localhost:5050) with your browser to see the pgadmin login page.
+
+### Run the prisma migrations
+
+Before running the app you have to migrate and seed the database. This has to be done once.
+
+```bash
+# Migrate to current schema
+npx prisma migrate deploy
+
+# Seed the database
+npx prisma db seed
+```
 
 Run the development server:
 

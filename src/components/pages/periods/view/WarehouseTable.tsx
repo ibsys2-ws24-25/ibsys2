@@ -1,9 +1,9 @@
 "use client";
 
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
-import Link from "next/link";
 import { Button } from '@/components/ui/button';
 import { Prisma, Warehouse } from "@prisma/client";
+import { useState } from "react";
 
 type WarehouseWithRelations = Prisma.WarehouseGetPayload<{
     include: {
@@ -13,9 +13,34 @@ type WarehouseWithRelations = Prisma.WarehouseGetPayload<{
 
 export interface WarehouseTableProps {
     warehouseEntries: WarehouseWithRelations[];
+    periodId: number;
 }
 
-export default function WarehouseTable({ warehouseEntries }: WarehouseTableProps) {
+export default function WarehouseTable({ warehouseEntries: initialEntries, periodId }: WarehouseTableProps) {
+    const [warehouseEntries, setWarehouseEntries] = useState<WarehouseWithRelations[]>(initialEntries);
+
+    const deleteWarehouseEntry = async (warehouseId: number) => {
+        const confirmed = confirm("Are you sure you want to delete this entry?");
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch(`/api/period/${periodId}/warehouse/${warehouseId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to delete warehouse entry");
+            }
+
+            setWarehouseEntries((prevEntries) =>
+                prevEntries.filter((entry) => entry.id !== warehouseId)
+            );
+        } catch (error) {
+            console.error("Error deleting warehouse entry:", error);
+            alert("Error deleting warehouse entry. Please try again.");
+        }
+    };
+
     return (
         <div className="overflow-x-auto w-full">
             <Table className="w-full border-collapse">
@@ -54,7 +79,10 @@ export default function WarehouseTable({ warehouseEntries }: WarehouseTableProps
                             </TableCell>
                             <TableCell>
                                 <div className="flex justify-center items-center">
-                                    <Button variant="destructive">
+                                    <Button
+                                        variant="destructive"
+                                        onClick={() => deleteWarehouseEntry(warehouseEntry.id)}
+                                    >
                                         Delete
                                     </Button>
                                 </div>

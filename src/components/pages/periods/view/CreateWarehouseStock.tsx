@@ -67,7 +67,7 @@ export default function CreateWarehouseStock({ periodId }: CreateWarehouseStockP
                 <DialogHeader>
                     <DialogTitle>Create a new Warehouse Stock</DialogTitle>
                     <DialogDescription>
-                        Enter the details below to create a new warehouse stock entry.
+                        Enter the details below to create a new warehouse stock entry. And reload the page after adding.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">

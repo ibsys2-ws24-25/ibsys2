@@ -1,5 +1,6 @@
 import CreateWarehouseStock from "@/components/pages/periods/view/CreateWarehouseStock";
-import { Prisma } from "@prisma/client";
+import WarehouseTable from "@/components/pages/periods/view/WarehouseTable";
+import { Prisma, Warehouse } from '@prisma/client';
 
 async function getPeriod(id: number) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${id}`, {
@@ -39,18 +40,18 @@ export default async function PeriodViewPage({ params }: { params: { periodId: n
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-8 text-primary">
+            <h1 className="text-4xl font-bold mb-8 text-primary">
                 Overview of Period {params.periodId}
             </h1>
             
-            {/* Row with h2 and Button */}
+            <h2 className="text-3xl text-primary">Before planning</h2>
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-primary">
+                <h3 className="text-2xl font-light text-primary">
                     Warehouse Value: {warehouseValue}$
-                </h2>
+                </h3>
                 <CreateWarehouseStock periodId={params.periodId} />
             </div>
-            
+            <WarehouseTable warehouseEntries={period.Warehouse} />
         </div>
     );
 }

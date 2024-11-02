@@ -5,10 +5,9 @@ import Link from "next/link";
 import { Button } from '@/components/ui/button';
 
 const periodData = [
-    { period: "Period 1", link: "/periods/1/production-planning/1" },
-    { period: "Period 2", link: "/periods/2/production-planning/1" },
-    { period: "Period 3", link: "/periods/3/production-planning/1" +
-            "" },
+    { period: 1, link: "/periods/1/production-planning/1" },
+    { period: 2, link: "/periods/2/production-planning/1" },
+    { period: 3, link: "/periods/3/production-planning/1" },
 ];
 
 export default function LinkTable() {

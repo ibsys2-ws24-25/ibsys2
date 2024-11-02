@@ -1,4 +1,5 @@
 import CreateWarehouseStock from "@/components/pages/periods/view/CreateWarehouseStock";
+import WarehouseChart from "@/components/pages/periods/view/WarehouseChart";
 import WarehouseTable from "@/components/pages/periods/view/WarehouseTable";
 import { Prisma, Warehouse } from '@prisma/client';
 import { Metadata } from "next";
@@ -57,6 +58,7 @@ export default async function PeriodViewPage({ params }: { params: { periodId: n
                 <CreateWarehouseStock periodId={params.periodId} />
             </div>
             <WarehouseTable warehouseEntries={period.Warehouse} periodId={params.periodId} />
+            <WarehouseChart warehouseEntries={period.Warehouse} />
         </div>
     );
 }

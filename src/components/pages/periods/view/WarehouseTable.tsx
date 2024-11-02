@@ -42,7 +42,7 @@ export default function WarehouseTable({ warehouseEntries: initialEntries, perio
     };
 
     return (
-        <div className="overflow-x-auto w-full">
+        <div className="overflow-x-auto w-full mb-4">
             <Table className="w-full border-collapse">
                 <TableHeader>
                     <TableRow>

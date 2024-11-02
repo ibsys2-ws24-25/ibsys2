@@ -184,29 +184,42 @@ async function main() {
         {materialId: "P3", requiredMaterialId: "K27", sum: 1},
         {materialId: "P3", requiredMaterialId: "E26", sum: 1},
         {materialId: "P3", requiredMaterialId: "E31", sum: 1},
+
         {materialId: "E31", requiredMaterialId: "K24", sum: 1},
         {materialId: "E31", requiredMaterialId: "K27", sum: 1},
         {materialId: "E31", requiredMaterialId: "E16", sum: 1},
         {materialId: "E31", requiredMaterialId: "E17", sum: 1},
-        {materialId: "P3", requiredMaterialId: "E30", sum: 1},
+        {materialId: "E31", requiredMaterialId: "E30", sum: 1},
+
         {materialId: "E30", requiredMaterialId: "K24", sum: 2},
         {materialId: "E30", requiredMaterialId: "K25", sum: 2},
         {materialId: "E30", requiredMaterialId: "E6", sum: 1},
+        {materialId: "E30", requiredMaterialId: "E12", sum: 1},
+        {materialId: "E30", requiredMaterialId: "E29", sum: 1},
+
         {materialId: "E6", requiredMaterialId: "K33", sum: 1},
         {materialId: "E6", requiredMaterialId: "K34", sum: 36},
-        {materialId: "E30", requiredMaterialId: "E12", sum: 1},
+        {materialId: "E6", requiredMaterialId: "K35", sum: 2},
+        {materialId: "E6", requiredMaterialId: "K36", sum: 1},
+
         {materialId: "E12", requiredMaterialId: "K32", sum: 1},
         {materialId: "E12", requiredMaterialId: "K39", sum: 1},
-        {materialId: "E30", requiredMaterialId: "E29", sum: 1},
+        
         {materialId: "E29", requiredMaterialId: "K24", sum: 1},
         {materialId: "E29", requiredMaterialId: "K25", sum: 2},
         {materialId: "E29", requiredMaterialId: "E9", sum: 1},
+        {materialId: "E29", requiredMaterialId: "E15", sum: 1},
+        {materialId: "E29", requiredMaterialId: "E20", sum: 1},
+
         {materialId: "E9", requiredMaterialId: "K33", sum: 1},
         {materialId: "E9", requiredMaterialId: "K34", sum: 36},
-        {materialId: "P3", requiredMaterialId: "E15", sum: 1},
+        {materialId: "E9", requiredMaterialId: "K35", sum: 2},
+        {materialId: "E9", requiredMaterialId: "K37", sum: 1},
+        {materialId: "E9", requiredMaterialId: "K38", sum: 1},
+
         {materialId: "E15", requiredMaterialId: "K32", sum: 1},
         {materialId: "E15", requiredMaterialId: "K39", sum: 1},
-        {materialId: "P3", requiredMaterialId: "E20", sum: 1},
+
         {materialId: "E20", requiredMaterialId: "K28", sum: 5},
         {materialId: "E20", requiredMaterialId: "K32", sum: 1},
         {materialId: "E20", requiredMaterialId: "K59", sum: 2}

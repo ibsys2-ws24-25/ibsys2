@@ -35,10 +35,54 @@ export default function LinkTable() {
                                     {period.period}
                                 </Link>
                             </TableCell>
-                            <TableCell className="flex justify-center items-center">
-                                <Button className="bg-primary text-primary-foreground">
-                                    <Link href="">PLAN</Link>
-                                </Button>
+                            <TableCell>
+                                <div className="flex justify-center items-center">
+                                    <Button className="bg-primary text-primary-foreground">
+                                        <Link href="">PLAN</Link>
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex justify-center items-center">
+                                    <Button className="bg-primary text-primary-foreground">
+                                        <Link href="">PLAN</Link>
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex justify-center items-center">
+                                    <Button className="bg-primary text-primary-foreground">
+                                        <Link href="">PLAN</Link>
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex justify-center items-center">
+                                    <Button className="bg-primary text-primary-foreground">
+                                        <Link href="">PLAN</Link>
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex justify-center items-center">
+                                    <Button className="bg-primary text-primary-foreground">
+                                        <Link href="">PLAN</Link>
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex justify-center items-center">
+                                    <Button className="bg-primary text-primary-foreground">
+                                        <Link href="">PLAN</Link>
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex justify-center items-center">
+                                    <Button className="bg-primary text-primary-foreground">
+                                        <Link href="">PLAN</Link>
+                                    </Button>
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}

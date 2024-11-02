@@ -2,12 +2,12 @@
 
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { tableData } from "@/app/MaterialP1/p1MockData";
+import { tableData } from "@/app/periods/[periodId]/production-planning/[productId]/p1MockData";
 
 const MaterialTable = () => {
     return (
         <div className="overflow-x-auto">
-            <Table className="w-4/5 border-collapse justify-self-end">
+            <Table className=" border-collapse">
                 <TableHeader>
                     <TableRow>
                         <TableHead>Item No.</TableHead>

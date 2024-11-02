@@ -1,4 +1,4 @@
-import MaterialTable from '@/components/pages/Material/materialTable';
+import MaterialTable from '@/components/pages/material/materialTable';
 
 export default async function HomePage() {
     return (

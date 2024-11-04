@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation';
 
 export default function CreatePeriod() {
     const [id, setId] = useState<number | undefined>();
+    const [xmlFile, setXmlFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
@@ -25,15 +26,22 @@ export default function CreatePeriod() {
             return;
         }
 
+        if (!xmlFile) {
+            alert("Please upload an XML file.");
+            return;
+        }
+
         setIsLoading(true);
 
         try {
+            // Create FormData to send both ID and file
+            const formData = new FormData();
+            formData.append("id", String(id));
+            formData.append("file", xmlFile);
+
             const response = await fetch('/api/period', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id }),
+                body: formData,
             });
 
             if (!response.ok) {
@@ -84,7 +92,12 @@ export default function CreatePeriod() {
                         <Label htmlFor="xmlFile" className="text-right">
                             Upload File
                         </Label>
-                        <Input id="xmlFile" type="file" className="col-span-3" />
+                        <Input
+                            id="xmlFile"
+                            type="file"
+                            className="col-span-3"
+                            onChange={(e) => setXmlFile(e.target.files ? e.target.files[0] : null)}
+                        />
                     </div>
                 </div>
                 <DialogFooter>

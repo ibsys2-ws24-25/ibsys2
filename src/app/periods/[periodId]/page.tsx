@@ -57,8 +57,8 @@ export default async function PeriodViewPage({ params }: { params: { periodId: n
                 </h3>
                 <CreateWarehouseStock periodId={params.periodId} />
             </div>
-            <WarehouseTable warehouseEntries={period.Warehouse} periodId={params.periodId} />
             <WarehouseChart warehouseEntries={period.Warehouse} />
+            <WarehouseTable warehouseEntries={period.Warehouse} periodId={params.periodId} />
         </div>
     );
 }

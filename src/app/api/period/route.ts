@@ -24,13 +24,12 @@ export async function POST(request: Request) {
         const contentType = request.headers.get("content-type") || "";
         
         // Handle JSON input to retrieve the "id" field
-        let id;
         let xmlData;
+        let id;
         
         if (contentType.includes("multipart/form-data")) {
             // Assume the XML is part of form-data
             const formData = await request.formData();
-            id = formData.get("id") as string;
             
             // Retrieve XML file from form-data
             const xmlFile = formData.get("file");
@@ -40,13 +39,11 @@ export async function POST(request: Request) {
                 
                 // Parse XML data
                 xmlData = await parseStringPromise(xmlText);
+                
+                id = xmlData.results.$.period;
             } else {
                 console.log("No XML file found in form data or file is not a valid File object.");
             }
-        } else if (contentType.includes("application/json")) {
-            // Handle pure JSON request
-            const jsonData = await request.json();
-            id = jsonData.id;
         }
 
         // Validate ID
@@ -65,7 +62,7 @@ export async function POST(request: Request) {
         if (xmlData && xmlData.results) {
             const results = xmlData.results;
 
-            // console.log(results);
+            console.log(results);
 
             // Check for warehouse entries
             if (results.warehousestock) {
@@ -85,7 +82,7 @@ export async function POST(request: Request) {
                         
                         if (articleEntity) {
                             warehouseStockEntities.push({
-                                periodId: newPeriod.id,
+                                periodId: Number(id),
                                 materialId: articleEntity?.id,
                                 amount: Number(article.$.amount)
                             });
@@ -97,6 +94,12 @@ export async function POST(request: Request) {
                         data: warehouseStockEntities,
                     });
                 }
+            }
+
+            if (results.futureinwardstockmovement) {
+                const futureinwardstockmovement = results.futureinwardstockmovement[0].order;
+
+                console.log(futureinwardstockmovement);
             }
         }
         

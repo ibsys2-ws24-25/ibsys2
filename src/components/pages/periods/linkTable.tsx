@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import Link from "next/link";
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import { Period } from "@prisma/client";
 
 export interface PeriodTableProps {
@@ -10,6 +12,32 @@ export interface PeriodTableProps {
 }
 
 export default function LinkTable({ periods }: PeriodTableProps) {
+    const [isDeleting, setIsDeleting] = useState(false);
+    const router = useRouter();
+
+    const deletePeriod = async (id: number) => {
+        if (!confirm("Are you sure you want to delete this period?")) return;
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`/api/period/${id}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to delete period.");
+            }
+
+            // Reload the page or fetch updated data
+            router.refresh(); // Reload to update the table after deletion
+        } catch (error) {
+            console.error("Error deleting period:", error);
+            alert("Error deleting period. Please try again.");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return (
         <div className="overflow-x-auto w-full">
             <Table className="w-full border-collapse">
@@ -20,6 +48,7 @@ export default function LinkTable({ periods }: PeriodTableProps) {
                         <TableHead className="text-center">Workplace</TableHead>
                         <TableHead className="text-center">Purchase Planning</TableHead>
                         <TableHead className="text-center">Export</TableHead>
+                        <TableHead className="text-center">Delete</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -57,6 +86,15 @@ export default function LinkTable({ periods }: PeriodTableProps) {
                                         <Link href="">PLAN</Link>
                                     </Button>
                                 </div>
+                            </TableCell>
+                            <TableCell className="text-center">
+                                <Button
+                                    variant="destructive"
+                                    onClick={() => deletePeriod(period.id)}
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? "Deleting..." : "Delete"}
+                                </Button>
                             </TableCell>
                         </TableRow>
                     ))}

@@ -33,14 +33,15 @@ export async function POST(request: Request) {
             id = formData.get("id") as string;
             
             // Retrieve XML file from form-data
-            const xmlFile = formData.get("file"); // Replace 'file' with your XML field name
+            const xmlFile = formData.get("file");
+
             if (xmlFile && typeof xmlFile === 'object' && xmlFile instanceof File) {
                 const xmlText = await xmlFile.text();
                 
                 // Parse XML data
                 xmlData = await parseStringPromise(xmlText);
-
-                console.log(xmlData);
+            } else {
+                console.log("No XML file found in form data or file is not a valid File object.");
             }
         } else if (contentType.includes("application/json")) {
             // Handle pure JSON request
@@ -54,17 +55,53 @@ export async function POST(request: Request) {
         }
 
         // Save data to the database, including parsed XML if required
-        /* Temporary disabled
         const newPeriod = await prisma.period.create({
             data: {
                 id: Number(id),
             },
         });
-        */
+
+        // Validate XML Schema
+        if (xmlData && xmlData.results) {
+            const results = xmlData.results;
+
+            // console.log(results);
+
+            // Check for warehouse entries
+            if (results.warehousestock) {
+                const warehousestock = results.warehousestock[0];
+                
+                if (warehousestock.article) {
+                    const warehouseStockEntities = [];
+                    for (const article of warehousestock.article) {
+                        // console.log(article);
+                        const articleEntity = await prisma.material.findFirst({
+                            where: {
+                                id: {
+                                    contains: article.$.id
+                                }
+                            }
+                        });
+                        
+                        if (articleEntity) {
+                            warehouseStockEntities.push({
+                                periodId: newPeriod.id,
+                                materialId: articleEntity?.id,
+                                amount: Number(article.$.amount)
+                            });
+                        }
+                    }
+
+                    // Saving warehouse stock to DB
+                    await prisma.warehouse.createMany({
+                        data: warehouseStockEntities,
+                    });
+                }
+            }
+        }
         
         return NextResponse.json(
-            //newPeriod,
-            {},
+            newPeriod,
             { status: 201 }
         );
 

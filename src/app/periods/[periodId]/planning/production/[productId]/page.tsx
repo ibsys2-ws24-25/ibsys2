@@ -1,15 +1,16 @@
 import MaterialTable from '@/components/pages/material/materialTable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getProductionPlan } from '@/lib/prodUtils';
-import { Prisma, Setting } from '@prisma/client';
+import { Prisma, ProductionPlanDecision, Setting } from '@prisma/client';
+import { notFound } from 'next/navigation';
 
 async function getPeriod(id: number): Promise<PeriodWithRelations> {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${id}`, {
         cache: 'no-store',
     });
     if (!response.ok) {
-        console.log(response);
-        throw new Error('Failed to fetch period');
+        console.error('Failed to fetch period');
+        return notFound();
     }
     return response.json();
 }
@@ -49,7 +50,8 @@ async function fetchMaterials(): Promise<MaterialWithRelations[]> {
         cache: 'no-store',
     });
     if (!response.ok) {
-      throw new Error('Failed to fetch materials');
+      console.error('Failed to fetch materials');
+      return notFound();
     }
     return response.json();
 }
@@ -64,9 +66,21 @@ async function fetchSetting(name: string): Promise<Setting> {
     return response.json();
 }
 
+async function fetchDecisions(periodId: number): Promise<ProductionPlanDecision[]> {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${periodId}/production`, {
+        cache: 'no-store',
+    });
+    if (!response.ok) {
+      console.error('Failed to fetch decisions');
+      return notFound();
+    }
+    return response.json();
+}
+
 export default async function HomePage({ params }: { params: { periodId: number, productId: number } }) {
     const period = await getPeriod(params.periodId);
     const materials = await fetchMaterials();
+    const decisions = await fetchDecisions(params.periodId);
 
     const productionPlan = getProductionPlan(materials, period.Warehouse, period.Forecast, `P${params.productId}`, Number(params.periodId) + Number(1));
 
@@ -81,7 +95,7 @@ export default async function HomePage({ params }: { params: { periodId: number,
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <MaterialTable productionPlan={ productionPlan } defaultStockSetting={ defaultStockSetting.value } />
+                <MaterialTable productionPlan={ productionPlan } defaultStockSetting={ defaultStockSetting.value } periodId={String(params.periodId)} productId={`P${params.productId}`} decisions={decisions} />
             </CardContent>
         </Card>            
     );

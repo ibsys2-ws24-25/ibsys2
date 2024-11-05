@@ -8,14 +8,15 @@ datasource db {
 }
 
 model Material {
-  id                  String                @id
-  name                String                @default("")
+  id                  String                   @id
+  name                String                   @default("")
   itemValue           Float
-  defaultStock        Int                   @default(100)
-  MaterialsRequired   MaterialRequirement[] @relation("RequirementToMaterial") // Materialien, die dieses Material benötigt
-  MaterialsRequiredBy MaterialRequirement[] @relation("MaterialToRequirements") // Materialien, die dieses Material benötigen
+  defaultStock        Int                      @default(100)
+  MaterialsRequired   MaterialRequirement[]    @relation("RequirementToMaterial") // Materialien, die dieses Material benötigt
+  MaterialsRequiredBy MaterialRequirement[]    @relation("MaterialToRequirements") // Materialien, die dieses Material benötigen
   Warehouse           Warehouse[]
   Forecast            Forecast[]
+  ProductionPlan      ProductionPlanDecision[]
 }
 
 model MaterialRequirement {
@@ -28,10 +29,11 @@ model MaterialRequirement {
 }
 
 model Period {
-  id        Int         @id
-  created   DateTime    @default(now())
-  Warehouse Warehouse[]
-  Forecast  Forecast[]
+  id             Int                      @id
+  created        DateTime                 @default(now())
+  Warehouse      Warehouse[]
+  Forecast       Forecast[]
+  ProductionPlan ProductionPlanDecision[]
 }
 
 model Warehouse {
@@ -51,6 +53,18 @@ model Forecast {
   periodId   Int
   materialId String
   amount     Int
+}
+
+model ProductionPlanDecision {
+  id          Int      @id @default(autoincrement())
+  Period      Period   @relation(fields: [periodId], references: [id])
+  Material    Material @relation(fields: [materialId], references: [id])
+  periodId    Int
+  materialId  String
+  safetyStock Int
+  productId   String
+
+  @@unique([periodId, materialId, productId])
 }
 
 model Setting {

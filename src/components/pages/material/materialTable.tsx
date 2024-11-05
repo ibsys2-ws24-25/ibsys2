@@ -10,7 +10,7 @@ export interface MaterialTableProps {
 }
 
 const MaterialTable = ({ productionPlan, defaultStockSetting }: MaterialTableProps) => {
-    
+
 
     return (
         <div className="overflow-x-auto">

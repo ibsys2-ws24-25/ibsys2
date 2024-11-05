@@ -1,6 +1,21 @@
-import { Material } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
-export function getMaterial(materials: Material[], id: string) {
+type MaterialWithRelations = Prisma.MaterialGetPayload<{
+    include: {
+        MaterialsRequired: {
+          include: {
+            RequiredMaterial: true,
+          },
+        },
+        MaterialsRequiredBy: {
+          include: {
+            Material: true,
+          },
+        },
+    },
+}>;
+
+export function getMaterial(materials: MaterialWithRelations[], id: string) {
     for (const material of materials) {
         if (material.id === id) {
             return material;
@@ -8,4 +23,8 @@ export function getMaterial(materials: Material[], id: string) {
     }
 
     return null;
+}
+
+export function getProductionPlan(materials: MaterialWithRelations[], id: string) {
+    
 }

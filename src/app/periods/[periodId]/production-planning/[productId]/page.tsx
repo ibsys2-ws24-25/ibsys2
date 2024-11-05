@@ -27,10 +27,34 @@ type PeriodWithRelations = Prisma.PeriodGetPayload<{
     };
 }>;
 
+type MaterialWithRelations = Prisma.MaterialGetPayload<{
+    include: {
+        MaterialsRequired: {
+          include: {
+            RequiredMaterial: true,
+          },
+        },
+        MaterialsRequiredBy: {
+          include: {
+            Material: true,
+          },
+        },
+    },
+}>;
+
+async function fetchMaterials(): Promise<MaterialWithRelations[]> {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/material`, {
+        cache: 'no-store',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch materials');
+    }
+    return response.json();
+}
+
 export default async function HomePage({ params }: { params: { periodId: number, productId: number } }) {
     const period = await getPeriod(params.periodId);
-
-    console.log(period.Warehouse);
+    const materials = await fetchMaterials();    
 
     return (
         <div>

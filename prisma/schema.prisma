@@ -57,7 +57,7 @@ model Forecast {
 
 model ProductionPlanDecision {
   id          Int      @id @default(autoincrement())
-  Period      Period   @relation(fields: [periodId], references: [id])
+  Period      Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
   Material    Material @relation(fields: [materialId], references: [id])
   periodId    Int
   materialId  String

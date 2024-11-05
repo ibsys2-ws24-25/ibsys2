@@ -27,12 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}>
         <SidebarProvider>
           <SidebarComponent />
-          <div className="flex justify-between min-h-screen w-full m-5">
+          <div className="flex justify-between w-full m-5">
             <SidebarTrigger />
-            <div className="w-full flex justify-center m-5 mt-10">
+            <div className="w-full flex justify-center">
                 {children}
             </div>
           </div>

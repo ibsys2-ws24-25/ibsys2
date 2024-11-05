@@ -10,7 +10,7 @@ export interface MaterialTableProps {
 }
 
 const MaterialTable = ({ productionPlan, defaultStockSetting }: MaterialTableProps) => {
-    console.log(productionPlan);
+    
 
     return (
         <div className="overflow-x-auto">
@@ -33,7 +33,7 @@ const MaterialTable = ({ productionPlan, defaultStockSetting }: MaterialTablePro
                                 {material.materialId}
                             </TableCell>
                             <TableCell>
-                                {"To calc"}
+                                { material.salesPlan }
                             </TableCell>
                             <TableCell>
                                 <Input type="number" defaultValue={parseInt(defaultStockSetting)} className="text-center w-full"/>

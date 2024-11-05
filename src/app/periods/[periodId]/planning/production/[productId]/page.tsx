@@ -1,4 +1,5 @@
 import MaterialTable from '@/components/pages/material/materialTable';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getProductionPlan } from '@/lib/prodUtils';
 import { Prisma, Setting } from '@prisma/client';
 
@@ -67,14 +68,21 @@ export default async function HomePage({ params }: { params: { periodId: number,
     const period = await getPeriod(params.periodId);
     const materials = await fetchMaterials();
 
-    const productionPlan = getProductionPlan(materials, period.Warehouse, `P${params.productId}`);
+    const productionPlan = getProductionPlan(materials, period.Warehouse, period.Forecast, `P${params.productId}`, Number(params.periodId) + Number(1));
 
     const defaultStockSetting = await fetchSetting('safety_stock_default');
 
     return (
-        <div>
-            <h1 className='text-2xl font-bold mb-4 text-primary'>Production Plan for Product {params.productId} in Period {params.periodId}</h1>
-            <MaterialTable productionPlan={ productionPlan } defaultStockSetting={ defaultStockSetting.value } />
-        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>Production Plan for Product {params.productId} in Period {params.periodId}</CardTitle>
+                <CardDescription>
+                    Plan the production for the next period by definining your safety stock.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <MaterialTable productionPlan={ productionPlan } defaultStockSetting={ defaultStockSetting.value } />
+            </CardContent>
+        </Card>            
     );
 }

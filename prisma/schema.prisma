@@ -50,6 +50,7 @@ model Forecast {
   forPeriod  Int
   periodId   Int
   materialId String
+  amount     Int
 }
 
 model Setting {

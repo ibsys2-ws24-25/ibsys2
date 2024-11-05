@@ -40,7 +40,7 @@ export async function POST(request: Request) {
                 // Parse XML data
                 xmlData = await parseStringPromise(xmlText);
                 
-                id = xmlData.results.$.period;
+                id = Number(xmlData.results.$.period);
             } else {
                 console.log("No XML file found in form data or file is not a valid File object.");
             }
@@ -62,7 +62,42 @@ export async function POST(request: Request) {
         if (xmlData && xmlData.results) {
             const results = xmlData.results;
 
-            console.log(results);
+            // Create forecast
+            if (results.forecast[0]) {
+                const forecast = results.forecast[0];
+
+                // console.log(forecast);
+
+                const forecastEntities = [];
+                
+                if (forecast.$) {
+                    forecastEntities.push({
+                        forPeriod: (Number(id) + 1),
+                        periodId: Number(id),
+                        materialId: "P1",
+                        amount: Number(forecast.$.p1),
+                    });
+
+                    forecastEntities.push({
+                        forPeriod: (Number(id) + 1),
+                        periodId: Number(id),
+                        materialId: "P2",
+                        amount: Number(forecast.$.p2),
+                    });
+
+                    forecastEntities.push({
+                        forPeriod: (Number(id) + 1),
+                        periodId: Number(id),
+                        materialId: "P3",
+                        amount: Number(forecast.$.p3),
+                    });
+
+                    // Saving warehouse stock to DB
+                    await prisma.forecast.createMany({
+                        data: forecastEntities,
+                    });
+                }
+            }
 
             // Check for warehouse entries
             if (results.warehousestock) {
@@ -96,11 +131,13 @@ export async function POST(request: Request) {
                 }
             }
 
+            /*
             if (results.futureinwardstockmovement) {
                 const futureinwardstockmovement = results.futureinwardstockmovement[0].order;
 
                 console.log(futureinwardstockmovement);
             }
+            */
         }
         
         return NextResponse.json(

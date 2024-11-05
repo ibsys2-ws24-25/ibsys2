@@ -2,9 +2,16 @@
 
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { tableData } from "@/app/periods/[periodId]/production-planning/[productId]/p1MockData";
+import { ProductionPlan } from "@/lib/prodUtils";
 
-const MaterialTable = () => {
+export interface MaterialTableProps {
+    productionPlan: ProductionPlan[];
+    defaultStockSetting: string;
+}
+
+const MaterialTable = ({ productionPlan, defaultStockSetting }: MaterialTableProps) => {
+    console.log(productionPlan);
+
     return (
         <div className="overflow-x-auto">
             <Table className=" border-collapse">
@@ -17,35 +24,31 @@ const MaterialTable = () => {
                         <TableHead>Orders in Queue</TableHead>
                         <TableHead>Work in Progress</TableHead>
                         <TableHead>Production Orders</TableHead>
-                        <TableHead>Description</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {tableData.map((row, index) => (
-                        <TableRow key={index} className="border-t">
+                    {productionPlan.map((material) => (
+                        <TableRow key={material.materialId} className="border-t">
                             <TableCell>
-                                {row.itemNo}
+                                {material.materialId}
                             </TableCell>
                             <TableCell>
-                                {row.salesOrders}
+                                {"To calc"}
                             </TableCell>
                             <TableCell>
-                                <Input type="number" defaultValue={row.safetyStock} className="text-center w-full"/>
+                                <Input type="number" defaultValue={parseInt(defaultStockSetting)} className="text-center w-full"/>
                             </TableCell>
                             <TableCell>
-                                {row.warehouseStock}
+                                {material.warehouseStock}
                             </TableCell>
                             <TableCell>
-                                {row.queueOrders}
+                                {material.queueOrders}
                             </TableCell>
                             <TableCell>
-                                {row.workInProgress}
+                                {material.workInProgress}
                             </TableCell>
                             <TableCell>
-                                {row.productionOrders}
-                            </TableCell>
-                            <TableCell>
-                                {row.description}
+                                {"To calc"}
                             </TableCell>
                         </TableRow>
                     ))}

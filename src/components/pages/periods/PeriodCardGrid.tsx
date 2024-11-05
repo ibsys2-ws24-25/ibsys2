@@ -42,7 +42,7 @@ export default function PeriodCardGrid({ periods }: PeriodTableProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full mt-4">
             {
                 periods.map((period) => (
-                    <Card key={period.id} className="shadow-lg p-4">
+                    <Card key={period.id} className="p-2">
                         <CardHeader>
                             <CardTitle>Period {period.id}</CardTitle>
                             <CardDescription>{String(period.created)}</CardDescription>
@@ -51,6 +51,21 @@ export default function PeriodCardGrid({ periods }: PeriodTableProps) {
                             <Button variant="default" className="w-full">
                                 <Link href={`/periods/${period.id}`}>
                                     View Period
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full mt-1">
+                                <Link href={`/periods/${period.id}/planning/production/1`}>
+                                    Plan Production P1
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full mt-1">
+                                <Link href={`/periods/${period.id}/planning/production/2`}>
+                                    Plan Production P2
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full mt-1">
+                                <Link href={`/periods/${period.id}/planning/production/3`}>
+                                    Plan Production P3
                                 </Link>
                             </Button>
                             <Button

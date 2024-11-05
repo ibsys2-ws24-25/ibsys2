@@ -1,4 +1,5 @@
 import MaterialTable from '@/components/pages/material/materialTable';
+import { getProductionPlan } from '@/lib/prodUtils';
 import { Prisma } from '@prisma/client';
 
 async function getPeriod(id: number): Promise<PeriodWithRelations> {
@@ -54,12 +55,14 @@ async function fetchMaterials(): Promise<MaterialWithRelations[]> {
 
 export default async function HomePage({ params }: { params: { periodId: number, productId: number } }) {
     const period = await getPeriod(params.periodId);
-    const materials = await fetchMaterials();    
+    const materials = await fetchMaterials();
+
+    const productionPlan = getProductionPlan(materials, period.Warehouse, `P${params.productId}`);
 
     return (
         <div>
             <h1 className='text-2xl font-bold mb-4 text-primary'>Production Plan for Product {params.productId} in Period {params.periodId}</h1>
-            <MaterialTable />
+            <MaterialTable productionPlan={ productionPlan } />
         </div>
     );
 }

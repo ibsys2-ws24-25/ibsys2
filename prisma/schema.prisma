@@ -51,3 +51,8 @@ model Forecast {
   periodId   Int
   materialId String
 }
+
+model Setting {
+  name  String @id
+  value String
+}

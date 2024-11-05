@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient, Setting } from '@prisma/client'
 const prisma = new PrismaClient()
 async function main() {
     const producedMaterials = [
@@ -66,167 +66,189 @@ async function main() {
         {id: "K59", name: "Welding wires", itemValue: 0.15, defaultStock: 1800},
     ];
 
-    await prisma.material.createMany({
-        data: producedMaterials.concat(purchasedMaterials),
-    });
+    try {
+        await prisma.material.createMany({
+            data: producedMaterials.concat(purchasedMaterials),
+        });
 
-    const materialRequirements = [
-        // BOM for P1
-        {materialId: "P1", requiredMaterialId: "K21", sum: 1},
-        {materialId: "P1", requiredMaterialId: "K24", sum: 1},
-        {materialId: "P1", requiredMaterialId: "K27", sum: 1},
-        {materialId: "P1", requiredMaterialId: "E26", sum: 1},
-        {materialId: "P1", requiredMaterialId: "E51", sum: 1},
+        const materialRequirements = [
+            // BOM for P1
+            {materialId: "P1", requiredMaterialId: "K21", sum: 1},
+            {materialId: "P1", requiredMaterialId: "K24", sum: 1},
+            {materialId: "P1", requiredMaterialId: "K27", sum: 1},
+            {materialId: "P1", requiredMaterialId: "E26", sum: 1},
+            {materialId: "P1", requiredMaterialId: "E51", sum: 1},
+    
+            {materialId: "E26", requiredMaterialId: "K44", sum: 2},
+            {materialId: "E26", requiredMaterialId: "K47", sum: 1},
+            {materialId: "E26", requiredMaterialId: "K48", sum: 2},
+    
+            {materialId: "E51", requiredMaterialId: "K24", sum: 1},
+            {materialId: "E51", requiredMaterialId: "K27", sum: 1},
+            {materialId: "E51", requiredMaterialId: "E16", sum: 1},
+            {materialId: "E51", requiredMaterialId: "E17", sum: 1},
+            {materialId: "E51", requiredMaterialId: "E50", sum: 1},
+    
+            {materialId: "E16", requiredMaterialId: "K24", sum: 1},
+            {materialId: "E16", requiredMaterialId: "K28", sum: 1},
+            {materialId: "E16", requiredMaterialId: "K40", sum: 1},
+            {materialId: "E16", requiredMaterialId: "K41", sum: 1},
+            {materialId: "E16", requiredMaterialId: "K42", sum: 2},
+    
+            {materialId: "E17", requiredMaterialId: "K43", sum: 1},
+            {materialId: "E17", requiredMaterialId: "K44", sum: 1},
+            {materialId: "E17", requiredMaterialId: "K45", sum: 1},
+            {materialId: "E17", requiredMaterialId: "K46", sum: 1},
+            
+            {materialId: "E50", requiredMaterialId: "K24", sum: 2},
+            {materialId: "E50", requiredMaterialId: "K25", sum: 2},
+            {materialId: "E50", requiredMaterialId: "E4", sum: 1},
+            {materialId: "E50", requiredMaterialId: "E10", sum: 1},
+            {materialId: "E50", requiredMaterialId: "E49", sum: 1},
+    
+            {materialId: "E4", requiredMaterialId: "K35", sum: 2},
+            {materialId: "E4", requiredMaterialId: "K36", sum: 1},
+            {materialId: "E4", requiredMaterialId: "K52", sum: 1},
+            {materialId: "E4", requiredMaterialId: "K53", sum: 36},
+    
+            {materialId: "E10", requiredMaterialId: "K32", sum: 1},
+            {materialId: "E10", requiredMaterialId: "K39", sum: 1},
+            
+            {materialId: "E49", requiredMaterialId: "K24", sum: 1},
+            {materialId: "E49", requiredMaterialId: "K25", sum: 2},
+            {materialId: "E49", requiredMaterialId: "E7", sum: 1},
+            {materialId: "E49", requiredMaterialId: "E13", sum: 1},
+            {materialId: "E49", requiredMaterialId: "E18", sum: 1},
+    
+            {materialId: "E7", requiredMaterialId: "K35", sum: 2},
+            {materialId: "E7", requiredMaterialId: "K37", sum: 1},
+            {materialId: "E7", requiredMaterialId: "K38", sum: 1},
+            {materialId: "E7", requiredMaterialId: "K52", sum: 1},
+            {materialId: "E7", requiredMaterialId: "K53", sum: 36},
+    
+            {materialId: "E13", requiredMaterialId: "K32", sum: 1},
+            {materialId: "E13", requiredMaterialId: "K39", sum: 1},
+    
+            {materialId: "E18", requiredMaterialId: "K28", sum: 3},
+            {materialId: "E18", requiredMaterialId: "K32", sum: 1},
+            {materialId: "E18", requiredMaterialId: "K59", sum: 2},
+          
+            // BOM for P2
+            {materialId: "P2", requiredMaterialId: "K22", sum: 1},
+            {materialId: "P2", requiredMaterialId: "K24", sum: 1},
+            {materialId: "P2", requiredMaterialId: "K27", sum: 1},
+            {materialId: "P2", requiredMaterialId: "E26", sum: 1},
+            {materialId: "P2", requiredMaterialId: "E56", sum: 1},
+    
+            {materialId: "E56", requiredMaterialId: "K24", sum: 1},
+            {materialId: "E56", requiredMaterialId: "K27", sum: 1},
+            {materialId: "E56", requiredMaterialId: "E16", sum: 1},
+            {materialId: "E56", requiredMaterialId: "E17", sum: 1},
+            {materialId: "E56", requiredMaterialId: "E55", sum: 1},
+    
+            {materialId: "E55", requiredMaterialId: "K24", sum: 2},
+            {materialId: "E55", requiredMaterialId: "K25", sum: 2},
+            {materialId: "E55", requiredMaterialId: "E5", sum: 1},
+            {materialId: "E55", requiredMaterialId: "E11", sum: 1},
+            {materialId: "E55", requiredMaterialId: "E54", sum: 1},
+    
+            {materialId: "E5", requiredMaterialId: "K35", sum: 2},
+            {materialId: "E5", requiredMaterialId: "K36", sum: 1},
+            {materialId: "E5", requiredMaterialId: "K57", sum: 1},
+            {materialId: "E5", requiredMaterialId: "K58", sum: 36},
+    
+            {materialId: "E11", requiredMaterialId: "K32", sum: 1},
+            {materialId: "E11", requiredMaterialId: "K39", sum: 1},
+    
+            {materialId: "E54", requiredMaterialId: "K24", sum: 2},
+            {materialId: "E54", requiredMaterialId: "K25", sum: 2},
+            {materialId: "E54", requiredMaterialId: "E8", sum: 1},
+            {materialId: "E54", requiredMaterialId: "E14", sum: 1},
+            {materialId: "E54", requiredMaterialId: "E19", sum: 1},
+    
+            {materialId: "E8", requiredMaterialId: "K35", sum: 2},
+            {materialId: "E8", requiredMaterialId: "K37", sum: 1},
+            {materialId: "E8", requiredMaterialId: "K38", sum: 1},
+            {materialId: "E8", requiredMaterialId: "K57", sum: 1},
+            {materialId: "E8", requiredMaterialId: "K58", sum: 36},
+    
+            {materialId: "E14", requiredMaterialId: "K32", sum: 1},
+            {materialId: "E14", requiredMaterialId: "K39", sum: 1},
+    
+            {materialId: "E19", requiredMaterialId: "K28", sum: 4},
+            {materialId: "E19", requiredMaterialId: "K32", sum: 1},
+            {materialId: "E19", requiredMaterialId: "K59", sum: 2},
+          
+            // BOM for P3
+            {materialId: "P3", requiredMaterialId: "K23", sum: 1},
+            {materialId: "P3", requiredMaterialId: "K24", sum: 1},
+            {materialId: "P3", requiredMaterialId: "K27", sum: 1},
+            {materialId: "P3", requiredMaterialId: "E26", sum: 1},
+            {materialId: "P3", requiredMaterialId: "E31", sum: 1},
+    
+            {materialId: "E31", requiredMaterialId: "K24", sum: 1},
+            {materialId: "E31", requiredMaterialId: "K27", sum: 1},
+            {materialId: "E31", requiredMaterialId: "E16", sum: 1},
+            {materialId: "E31", requiredMaterialId: "E17", sum: 1},
+            {materialId: "E31", requiredMaterialId: "E30", sum: 1},
+    
+            {materialId: "E30", requiredMaterialId: "K24", sum: 2},
+            {materialId: "E30", requiredMaterialId: "K25", sum: 2},
+            {materialId: "E30", requiredMaterialId: "E6", sum: 1},
+            {materialId: "E30", requiredMaterialId: "E12", sum: 1},
+            {materialId: "E30", requiredMaterialId: "E29", sum: 1},
+    
+            {materialId: "E6", requiredMaterialId: "K33", sum: 1},
+            {materialId: "E6", requiredMaterialId: "K34", sum: 36},
+            {materialId: "E6", requiredMaterialId: "K35", sum: 2},
+            {materialId: "E6", requiredMaterialId: "K36", sum: 1},
+    
+            {materialId: "E12", requiredMaterialId: "K32", sum: 1},
+            {materialId: "E12", requiredMaterialId: "K39", sum: 1},
+            
+            {materialId: "E29", requiredMaterialId: "K24", sum: 1},
+            {materialId: "E29", requiredMaterialId: "K25", sum: 2},
+            {materialId: "E29", requiredMaterialId: "E9", sum: 1},
+            {materialId: "E29", requiredMaterialId: "E15", sum: 1},
+            {materialId: "E29", requiredMaterialId: "E20", sum: 1},
+    
+            {materialId: "E9", requiredMaterialId: "K33", sum: 1},
+            {materialId: "E9", requiredMaterialId: "K34", sum: 36},
+            {materialId: "E9", requiredMaterialId: "K35", sum: 2},
+            {materialId: "E9", requiredMaterialId: "K37", sum: 1},
+            {materialId: "E9", requiredMaterialId: "K38", sum: 1},
+    
+            {materialId: "E15", requiredMaterialId: "K32", sum: 1},
+            {materialId: "E15", requiredMaterialId: "K39", sum: 1},
+    
+            {materialId: "E20", requiredMaterialId: "K28", sum: 5},
+            {materialId: "E20", requiredMaterialId: "K32", sum: 1},
+            {materialId: "E20", requiredMaterialId: "K59", sum: 2}
+        ];
+    
+        await prisma.materialRequirement.createMany({
+            data: materialRequirements,
+        });    
+    } catch (error: unknown) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2002') {
+                console.error("BOM already added. Skipping...");
+            } else {
+                console.error("An unexpected error occurred:", error);
+                throw error;
+            }
+        }
+    }
 
-        {materialId: "E26", requiredMaterialId: "K44", sum: 2},
-        {materialId: "E26", requiredMaterialId: "K47", sum: 1},
-        {materialId: "E26", requiredMaterialId: "K48", sum: 2},
-
-        {materialId: "E51", requiredMaterialId: "K24", sum: 1},
-        {materialId: "E51", requiredMaterialId: "K27", sum: 1},
-        {materialId: "E51", requiredMaterialId: "E16", sum: 1},
-        {materialId: "E51", requiredMaterialId: "E17", sum: 1},
-        {materialId: "E51", requiredMaterialId: "E50", sum: 1},
-
-        {materialId: "E16", requiredMaterialId: "K24", sum: 1},
-        {materialId: "E16", requiredMaterialId: "K28", sum: 1},
-        {materialId: "E16", requiredMaterialId: "K40", sum: 1},
-        {materialId: "E16", requiredMaterialId: "K41", sum: 1},
-        {materialId: "E16", requiredMaterialId: "K42", sum: 2},
-
-        {materialId: "E17", requiredMaterialId: "K43", sum: 1},
-        {materialId: "E17", requiredMaterialId: "K44", sum: 1},
-        {materialId: "E17", requiredMaterialId: "K45", sum: 1},
-        {materialId: "E17", requiredMaterialId: "K46", sum: 1},
-        
-        {materialId: "E50", requiredMaterialId: "K24", sum: 2},
-        {materialId: "E50", requiredMaterialId: "K25", sum: 2},
-        {materialId: "E50", requiredMaterialId: "E4", sum: 1},
-        {materialId: "E50", requiredMaterialId: "E10", sum: 1},
-        {materialId: "E50", requiredMaterialId: "E49", sum: 1},
-
-        {materialId: "E4", requiredMaterialId: "K35", sum: 2},
-        {materialId: "E4", requiredMaterialId: "K36", sum: 1},
-        {materialId: "E4", requiredMaterialId: "K52", sum: 1},
-        {materialId: "E4", requiredMaterialId: "K53", sum: 36},
-
-        {materialId: "E10", requiredMaterialId: "K32", sum: 1},
-        {materialId: "E10", requiredMaterialId: "K39", sum: 1},
-        
-        {materialId: "E49", requiredMaterialId: "K24", sum: 1},
-        {materialId: "E49", requiredMaterialId: "K25", sum: 2},
-        {materialId: "E49", requiredMaterialId: "E7", sum: 1},
-        {materialId: "E49", requiredMaterialId: "E13", sum: 1},
-        {materialId: "E49", requiredMaterialId: "E18", sum: 1},
-
-        {materialId: "E7", requiredMaterialId: "K35", sum: 2},
-        {materialId: "E7", requiredMaterialId: "K37", sum: 1},
-        {materialId: "E7", requiredMaterialId: "K38", sum: 1},
-        {materialId: "E7", requiredMaterialId: "K52", sum: 1},
-        {materialId: "E7", requiredMaterialId: "K53", sum: 36},
-
-        {materialId: "E13", requiredMaterialId: "K32", sum: 1},
-        {materialId: "E13", requiredMaterialId: "K39", sum: 1},
-
-        {materialId: "E18", requiredMaterialId: "K28", sum: 3},
-        {materialId: "E18", requiredMaterialId: "K32", sum: 1},
-        {materialId: "E18", requiredMaterialId: "K59", sum: 2},
-      
-        // BOM for P2
-        {materialId: "P2", requiredMaterialId: "K22", sum: 1},
-        {materialId: "P2", requiredMaterialId: "K24", sum: 1},
-        {materialId: "P2", requiredMaterialId: "K27", sum: 1},
-        {materialId: "P2", requiredMaterialId: "E26", sum: 1},
-        {materialId: "P2", requiredMaterialId: "E56", sum: 1},
-
-        {materialId: "E56", requiredMaterialId: "K24", sum: 1},
-        {materialId: "E56", requiredMaterialId: "K27", sum: 1},
-        {materialId: "E56", requiredMaterialId: "E16", sum: 1},
-        {materialId: "E56", requiredMaterialId: "E17", sum: 1},
-        {materialId: "E56", requiredMaterialId: "E55", sum: 1},
-
-        {materialId: "E55", requiredMaterialId: "K24", sum: 2},
-        {materialId: "E55", requiredMaterialId: "K25", sum: 2},
-        {materialId: "E55", requiredMaterialId: "E5", sum: 1},
-        {materialId: "E55", requiredMaterialId: "E11", sum: 1},
-        {materialId: "E55", requiredMaterialId: "E54", sum: 1},
-
-        {materialId: "E5", requiredMaterialId: "K35", sum: 2},
-        {materialId: "E5", requiredMaterialId: "K36", sum: 1},
-        {materialId: "E5", requiredMaterialId: "K57", sum: 1},
-        {materialId: "E5", requiredMaterialId: "K58", sum: 36},
-
-        {materialId: "E11", requiredMaterialId: "K32", sum: 1},
-        {materialId: "E11", requiredMaterialId: "K39", sum: 1},
-
-        {materialId: "E54", requiredMaterialId: "K24", sum: 2},
-        {materialId: "E54", requiredMaterialId: "K25", sum: 2},
-        {materialId: "E54", requiredMaterialId: "E8", sum: 1},
-        {materialId: "E54", requiredMaterialId: "E14", sum: 1},
-        {materialId: "E54", requiredMaterialId: "E19", sum: 1},
-
-        {materialId: "E8", requiredMaterialId: "K35", sum: 2},
-        {materialId: "E8", requiredMaterialId: "K37", sum: 1},
-        {materialId: "E8", requiredMaterialId: "K38", sum: 1},
-        {materialId: "E8", requiredMaterialId: "K57", sum: 1},
-        {materialId: "E8", requiredMaterialId: "K58", sum: 36},
-
-        {materialId: "E14", requiredMaterialId: "K32", sum: 1},
-        {materialId: "E14", requiredMaterialId: "K39", sum: 1},
-
-        {materialId: "E19", requiredMaterialId: "K28", sum: 4},
-        {materialId: "E19", requiredMaterialId: "K32", sum: 1},
-        {materialId: "E19", requiredMaterialId: "K59", sum: 2},
-      
-        // BOM for P3
-        {materialId: "P3", requiredMaterialId: "K23", sum: 1},
-        {materialId: "P3", requiredMaterialId: "K24", sum: 1},
-        {materialId: "P3", requiredMaterialId: "K27", sum: 1},
-        {materialId: "P3", requiredMaterialId: "E26", sum: 1},
-        {materialId: "P3", requiredMaterialId: "E31", sum: 1},
-
-        {materialId: "E31", requiredMaterialId: "K24", sum: 1},
-        {materialId: "E31", requiredMaterialId: "K27", sum: 1},
-        {materialId: "E31", requiredMaterialId: "E16", sum: 1},
-        {materialId: "E31", requiredMaterialId: "E17", sum: 1},
-        {materialId: "E31", requiredMaterialId: "E30", sum: 1},
-
-        {materialId: "E30", requiredMaterialId: "K24", sum: 2},
-        {materialId: "E30", requiredMaterialId: "K25", sum: 2},
-        {materialId: "E30", requiredMaterialId: "E6", sum: 1},
-        {materialId: "E30", requiredMaterialId: "E12", sum: 1},
-        {materialId: "E30", requiredMaterialId: "E29", sum: 1},
-
-        {materialId: "E6", requiredMaterialId: "K33", sum: 1},
-        {materialId: "E6", requiredMaterialId: "K34", sum: 36},
-        {materialId: "E6", requiredMaterialId: "K35", sum: 2},
-        {materialId: "E6", requiredMaterialId: "K36", sum: 1},
-
-        {materialId: "E12", requiredMaterialId: "K32", sum: 1},
-        {materialId: "E12", requiredMaterialId: "K39", sum: 1},
-        
-        {materialId: "E29", requiredMaterialId: "K24", sum: 1},
-        {materialId: "E29", requiredMaterialId: "K25", sum: 2},
-        {materialId: "E29", requiredMaterialId: "E9", sum: 1},
-        {materialId: "E29", requiredMaterialId: "E15", sum: 1},
-        {materialId: "E29", requiredMaterialId: "E20", sum: 1},
-
-        {materialId: "E9", requiredMaterialId: "K33", sum: 1},
-        {materialId: "E9", requiredMaterialId: "K34", sum: 36},
-        {materialId: "E9", requiredMaterialId: "K35", sum: 2},
-        {materialId: "E9", requiredMaterialId: "K37", sum: 1},
-        {materialId: "E9", requiredMaterialId: "K38", sum: 1},
-
-        {materialId: "E15", requiredMaterialId: "K32", sum: 1},
-        {materialId: "E15", requiredMaterialId: "K39", sum: 1},
-
-        {materialId: "E20", requiredMaterialId: "K28", sum: 5},
-        {materialId: "E20", requiredMaterialId: "K32", sum: 1},
-        {materialId: "E20", requiredMaterialId: "K59", sum: 2}
+    // Settings
+    const settings: Setting[] = [
+        { name: "safety_stock_default", value: "30" },
+        { name: "planspiel_game", value: "217" },
+        { name: "planspiel_group", value: "2" },
     ];
 
-    await prisma.materialRequirement.createMany({
-        data: materialRequirements,
+    await prisma.setting.createMany({
+        data: settings,
     })
 }
 main()

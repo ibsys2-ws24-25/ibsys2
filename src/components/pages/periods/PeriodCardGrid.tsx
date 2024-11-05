@@ -68,9 +68,19 @@ export default function PeriodCardGrid({ periods }: PeriodTableProps) {
                                     Plan Production P3
                                 </Link>
                             </Button>
+                            <Button variant="outline" className="w-full mt-2">
+                                <Link href={`/periods/${period.id}/planning/worktime`}>
+                                    Plan Worktime
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full mt-1">
+                                <Link href={`/periods/${period.id}/planning/purchase`}>
+                                    Purchase Parts
+                                </Link>
+                            </Button>
                             <Button
                                 variant="destructive"
-                                className="w-full mt-1"
+                                className="w-full mt-4"
                                 onClick={() => deletePeriod(period.id)}
                                 disabled={isDeleting}
                             >

@@ -6,9 +6,10 @@ import { ProductionPlan } from "@/lib/prodUtils";
 
 export interface MaterialTableProps {
     productionPlan: ProductionPlan[];
+    defaultStockSetting: string;
 }
 
-const MaterialTable = ({ productionPlan }: MaterialTableProps) => {
+const MaterialTable = ({ productionPlan, defaultStockSetting }: MaterialTableProps) => {
     console.log(productionPlan);
 
     return (
@@ -35,7 +36,7 @@ const MaterialTable = ({ productionPlan }: MaterialTableProps) => {
                                 {"To calc"}
                             </TableCell>
                             <TableCell>
-                                <Input type="number" defaultValue={100} className="text-center w-full"/>
+                                <Input type="number" defaultValue={parseInt(defaultStockSetting)} className="text-center w-full"/>
                             </TableCell>
                             <TableCell>
                                 {material.warehouseStock}

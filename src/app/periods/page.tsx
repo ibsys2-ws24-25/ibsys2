@@ -16,7 +16,7 @@ export default async function HomePage() {
     const periods = await fetchAllPeriods();
 
     return (
-        <div>
+        <div className="w-full">
             <CreatePeriod />
             <LinkTable periods={periods} />
         </div>

@@ -1,5 +1,5 @@
 import CreatePeriod from "@/components/pages/periods/CreatePeriod";
-import LinkTable from "@/components/pages/periods/linkTable"
+import PeriodCardGrid from "@/components/pages/periods/PeriodCardGrid";
 
 async function fetchAllPeriods () {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period`, {
@@ -16,9 +16,9 @@ export default async function HomePage() {
     const periods = await fetchAllPeriods();
 
     return (
-        <div className="w-full">
+        <div className="w-full mt-10">
             <CreatePeriod />
-            <LinkTable periods={periods} />
+            <PeriodCardGrid periods={periods} />
         </div>
     );
 }

@@ -45,7 +45,7 @@ export default async function PeriodViewPage({ params }: { params: { periodId: n
     );
 
     return (
-        <div className="w-full">
+        <div className="w-full mt-10">
             <h1 className="text-4xl font-bold mb-8 text-primary">
                 Overview of Period {params.periodId}
             </h1>

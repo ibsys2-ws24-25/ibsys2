@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+//forecast aufrufen
 export async function GET(request: Request, { params }: { params: { periodId: string } }) {
   try {
     const period = await prisma.period.findUnique({

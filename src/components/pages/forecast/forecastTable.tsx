@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 
 interface ForecastData {
-  materialId: string;
+  product: string;
   currentPeriod: string; // Menge für die aktuelle Periode
   nextPeriod1: string;   // Menge für die folgende Periode
   nextPeriod2: string;   // Menge für die übernächste Periode
@@ -36,7 +36,7 @@ export function ForecastTable({ currentPeriod }: ForecastTableProps) {
       }
       const data = await response.json();
       setForecastData(data.Forecast.map(f => ({
-        materialId: f.Material.id,
+        product: f.Material.id+ " " + f.Material.name,
         currentPeriod: f.amount.toString(),
         nextPeriod1: '',
         nextPeriod2: '',
@@ -66,7 +66,7 @@ export function ForecastTable({ currentPeriod }: ForecastTableProps) {
       <TableBody>
         {forecastData.map((data, index) => (
           <TableRow key={index}>
-            <TableCell>{data.materialId}</TableCell>
+            <TableCell>{data.product}</TableCell>
             <TableCell>{data.currentPeriod}</TableCell>
             <TableCell>
               <input

@@ -78,7 +78,7 @@ const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productI
 
     return (
         <div className="overflow-x-auto">
-            <Table className=" border-collapse">
+            <Table className="border-collapse">
                 <TableHeader>
                     <TableRow>
                         <TableHead>Item No.</TableHead>

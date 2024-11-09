@@ -41,6 +41,13 @@ export interface ProductionPlanMultipliers {
     amount: number;
 }
 
+export interface PurchaseParts {
+    materialId: string;
+    warehouseStock: number;
+    defaultStock: number;
+    // usage: string; //ToDo: calculate
+}
+
 export function getMaterial(materials: MaterialWithRelations[], id: string) {
     for (const material of materials) {
         if (material.id === id) {
@@ -59,6 +66,22 @@ export function getWarehouseByMaterialId(warehouse: WarehouseWithRelations[], id
     }
 
     return null;
+}
+
+export function getPurchaseParts(warehouse: WarehouseWithRelations[]) {
+    const purchaseParts: PurchaseParts[] = [];
+
+    for (const material of warehouse) {
+        if (material.materialId.includes("K")) {
+            purchaseParts.push({
+                materialId: material.materialId,
+                warehouseStock: material.amount,
+                defaultStock: material.Material.defaultStock
+            });
+        }
+    }
+
+    return purchaseParts;
 }
 
 export function getForecastForMaterialAndPeriod(forecasts: ForecastWithRelations[], materialId: string, periodId: number) {

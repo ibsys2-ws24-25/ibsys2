@@ -35,7 +35,7 @@ export default async function HomePage({ params }: { params: { periodId: number 
 
     return (
         <div>
-            <PurchaseTable purchaseParts={ purchaseParts }/>
+            <PurchaseTable purchaseParts={ purchaseParts } periodId={params.periodId}/>
         </div>
     );
 }

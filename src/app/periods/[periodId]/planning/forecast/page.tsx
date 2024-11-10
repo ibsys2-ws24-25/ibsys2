@@ -11,9 +11,9 @@ type DataWithAmounts = {
 export default function HomePage({ params }: { params: { periodId: number } }) {
   const [forecastData, setForecastData] = useState<DataWithAmounts[]>([]);
   const [productionData, setProductionData] = useState<DataWithAmounts[]>([
-      { product: "P1 Children's bicycle", amounts: [150, 250, 250, 200] },
-      { product: "P2 Ladies bicycle", amounts: [200, 150, 150, 100] },
-      { product: "P3 Men's bicycle", amounts: [150, 100, 100, 100] }
+      { product: "P1: Children's bicycle", amounts: [150, 250, 250, 200] },
+      { product: "P2: Ladies bicycle", amounts: [200, 150, 150, 100] },
+      { product: "P3: Men's bicycle", amounts: [150, 100, 100, 100] }
   ]);
   const [plannedStocks, setPlannedStocks] = useState<DataWithAmounts[]>([]);
 
@@ -28,7 +28,7 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
         }
         const data = await response.json();
         const formattedData = data.Forecast.map(f => ({
-            product: f.Material.id + " " + f.Material.name,
+            product: f.Material.id + ": " + f.Material.name,
             amounts: [parseInt(f.amount), 0, 0, 0]
         }));
         setForecastData(formattedData);
@@ -60,6 +60,29 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
     calculatePlannedStocks(forecastData, newData);
   }, [calculatePlannedStocks, forecastData]);
 
+  const saveProductionData = useCallback(async () => {
+    plannedStocks.forEach(async (item) => {
+      const materialId = item.product.split(':')[0];
+      item.amounts.forEach(async (safetyStock, index) => {
+        const periodId = parseInt(params.periodId) + index; // Assuming periods are sequential
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${periodId.toString()}/production`; // Konvertieren zu string
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            materialId,
+            productId: item.product,
+            safetyStock
+          }),
+        });
+  
+        if (!response.ok) {
+          console.error(`Failed to save production plan data for period ${periodId}`, response.statusText);
+        }
+      });
+    });
+  }, [plannedStocks, params.periodId]);
+  
   return (
       <div>
           <ForecastTable currentPeriod={params.periodId} data={forecastData} updateData={handleForecastDataChange} />
@@ -69,6 +92,7 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
             plannedStocks={plannedStocks} 
             handleProductionDataChange={handleProductionDataChange} 
           />
+          <button onClick={saveProductionData}>Save Production Data</button>
       </div>
   );
 }

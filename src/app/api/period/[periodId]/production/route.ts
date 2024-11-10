@@ -23,7 +23,7 @@ export async function GET(request: Request, { params }: { params: { periodId: st
 //productiinPlanDecision
 export async function POST(request: Request, { params }: { params: { periodId: string } }) {
   try {
-    const { materialId, productId, safetyStock } = await request.json();
+    const { materialId, productId, safetyStock, forPeriod} = await request.json();
     console.log(`Received data - PeriodID: ${params.periodId}, MaterialID: ${materialId}, ProductID: ${productId}, SafetyStock: ${safetyStock}`);
 
     // Prüfen, ob die Periode existiert
@@ -38,10 +38,11 @@ export async function POST(request: Request, { params }: { params: { periodId: s
 
     let decision = await prisma.productionPlanDecision.findUnique({
       where: {
-        periodId_materialId_productId: {
+        periodId_materialId_productId_forPeriod: {
           periodId: Number(params.periodId),
           materialId,
           productId,
+          forPeriod,
         },
       },
     });
@@ -49,10 +50,11 @@ export async function POST(request: Request, { params }: { params: { periodId: s
     if (decision) {
       decision = await prisma.productionPlanDecision.update({
         where: {
-            periodId_materialId_productId: {
+            periodId_materialId_productId_forPeriod: {
                 periodId: Number(params.periodId),
                 materialId,
                 productId,
+                forPeriod,
             },
         },
         data: {

@@ -62,26 +62,28 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
 
   const saveProductionData = useCallback(async () => {
     plannedStocks.forEach(async (item) => {
-      const materialId = item.product.split(':')[0];
+      const materialId = item.product.split(':')[0]; // Extrahieren des Material-IDs
       item.amounts.forEach(async (safetyStock, index) => {
-        const periodId = parseInt(params.periodId) + index; // Assuming periods are sequential
-        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${periodId.toString()}/production`; // Konvertieren zu string
+        const periodId = parseInt(params.periodId); // Die aktuelle Periode aus der URL
+        const forPeriod = periodId + index; // Berechnen der Zielperiode basierend auf dem Index
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${periodId.toString()}/production`; // POST-URL
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             materialId,
             productId: item.product,
-            safetyStock
+            safetyStock,
+            forPeriod
           }),
         });
   
         if (!response.ok) {
-          console.error(`Failed to save production plan data for period ${periodId}`, response.statusText);
+          console.error(`Failed to save production plan data for period ${periodId} targeting forPeriod ${forPeriod}`, response.statusText);
         }
       });
     });
-  }, [plannedStocks, params.periodId]);
+  }, [plannedStocks, params.periodId]);  
   
   return (
       <div>

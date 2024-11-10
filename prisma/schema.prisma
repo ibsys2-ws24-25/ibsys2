@@ -63,8 +63,9 @@ model ProductionPlanDecision {
   materialId  String
   safetyStock Int
   productId   String
+  forPeriod   Int?  
 
-  @@unique([periodId, materialId, productId])
+  @@unique([periodId, materialId, productId, forPeriod])
 }
 
 model Setting {

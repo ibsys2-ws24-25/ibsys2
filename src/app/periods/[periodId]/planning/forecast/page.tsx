@@ -32,36 +32,37 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
             amounts: [parseInt(f.amount), 0, 0, 0]
         }));
         setForecastData(formattedData);
+        calculatePlannedStocks(formattedData, productionData); // Initial calculation
     }
 
     fetchForecastData();
   }, [params.periodId]);
 
-  const calculatePlannedStocks = useCallback(() => {
-    const newPlannedStocks = productionData.map(prod => {
-        const forecast = forecastData.find(f => f.product === prod.product);
+  const calculatePlannedStocks = useCallback((forecast = forecastData, production = productionData) => {
+    const newPlannedStocks = production.map(prod => {
+        const forecastItem = forecast.find(f => f.product === prod.product);
         return {
             product: prod.product,
-            amounts: prod.amounts.map((amount, index) => amount - (forecast ? forecast.amounts[index] : 0))
+            amounts: prod.amounts.map((amount, index) => amount - (forecastItem ? forecastItem.amounts[index] : 0))
         };
     });
-
-    console.log("Forecast Data:", forecastData); // Debugging
-    console.log("Production Data:", productionData); // Debugging
-    console.log("Calculated Planned Stocks:", newPlannedStocks); // Debugging
 
     setPlannedStocks(newPlannedStocks);
   }, [forecastData, productionData]);
 
+  const handleForecastDataChange = useCallback((newData: DataWithAmounts[]) => {
+    setForecastData(newData);
+    calculatePlannedStocks(newData, productionData);
+  }, [calculatePlannedStocks, productionData]);
+
   const handleProductionDataChange = useCallback((newData: DataWithAmounts[]) => {
-    console.log("Updated Production Data:", newData); // Debugging
     setProductionData(newData);
-    calculatePlannedStocks();
-  }, [calculatePlannedStocks]);
+    calculatePlannedStocks(forecastData, newData);
+  }, [calculatePlannedStocks, forecastData]);
 
   return (
       <div>
-          <ForecastTable currentPeriod={params.periodId} data={forecastData} updateData={setForecastData} />
+          <ForecastTable currentPeriod={params.periodId} data={forecastData} updateData={handleForecastDataChange} />
           <ProductionTable 
             currentPeriod={params.periodId} 
             productionData={productionData} 

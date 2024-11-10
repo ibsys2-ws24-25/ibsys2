@@ -13,7 +13,7 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
   const [productionData, setProductionData] = useState<DataWithAmounts[]>([
       { product: "P1 Children's bicycle", amounts: [150, 250, 250, 200] },
       { product: "P2 Ladies bicycle", amounts: [200, 150, 150, 100] },
-      { product: "P3 Männerrad", amounts: [150, 100, 100, 100] }
+      { product: "P3 Men's bicycle", amounts: [150, 100, 100, 100] }
   ]);
   const [plannedStocks, setPlannedStocks] = useState<DataWithAmounts[]>([]);
 

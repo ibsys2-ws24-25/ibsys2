@@ -1,78 +1,93 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 
-interface ProductionData {
+interface DataWithAmounts {
   product: string;
-  amounts: number[];
+  amounts: number[]; // [Periode N, Periode N+1, Periode N+2, Periode N+3]
 }
 
 interface ProductionTableProps {
   currentPeriod: number;
+  productionData: DataWithAmounts[];
+  plannedStocks: DataWithAmounts[];
+  handleProductionDataChange: (newData: DataWithAmounts[]) => void;
 }
 
-// Initialisieren Sie die Daten außerhalb der Komponente, um sicherzustellen, dass sie definiert sind.
-const initialProductionData: ProductionData[] = [
-  { product: "P1: Kinderfahrrad", amounts: [150, 250, 250, 200] },
-  { product: "P2: Frauenrad", amounts: [200, 150, 150, 100] },
-  { product: "P3: Männerrad", amounts: [150, 100, 100, 100] },
-];
+export function ProductionTable({ currentPeriod, productionData, plannedStocks, handleProductionDataChange }: ProductionTableProps) {
+  const [productionValues, setProductionValues] = useState<DataWithAmounts[]>(productionData);
 
-export function ProductionTable({ currentPeriod }: ProductionTableProps) {
-  const [productionData, setProductionData] = useState<ProductionData[]>(initialProductionData);
+  useEffect(() => {
+    setProductionValues(productionData);
+  }, [productionData]);
 
   const handleInputChange = (index: number, periodOffset: number, value: string) => {
-    const newData = [...productionData];
-    newData[index].amounts[periodOffset] = Number(value);
-    setProductionData(newData);
+    const updatedProductionData = productionValues.map((prod, idx) => 
+      idx === index 
+        ? {
+            ...prod,
+            amounts: prod.amounts.map((amount, offset) => offset === periodOffset ? Number(value) : amount)
+          }
+        : prod
+    );
+
+    setProductionValues(updatedProductionData);
+    handleProductionDataChange(updatedProductionData);
   };
 
   return (
-    <Table>
-      <TableCaption>Produktionsprogramm: Wie viel wollen wir wovon produzieren?</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Produkt</TableHead>
-          <TableHead>Periode {currentPeriod}</TableHead>
-          <TableHead>Periode {+currentPeriod + 1}</TableHead>
-          <TableHead>Periode {+currentPeriod + 2}</TableHead>
-          <TableHead>Periode {+currentPeriod + 3}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {productionData.map((data, index) => (
-          <TableRow key={index}>
-            <TableCell>{data.product}</TableCell>
-            {data.amounts.map((amount, periodOffset) => (
-              <TableCell key={periodOffset}>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => handleInputChange(index, periodOffset, e.target.value)}
-                />
-              </TableCell>
-            ))}
+    <div>
+      <Table>
+        <TableCaption>Produktionsprogramm: Wie viel wollen wir wovon produzieren?</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Produkt</TableHead>
+            {Array.from({ length: 4 }, (_, i) => <TableHead key={i}>Periode {+ currentPeriod + i}</TableHead>)}
           </TableRow>
-        ))}
-      </TableBody>
-      <TableFooter>
-        <TableRow>
-          <TableCell>Summe</TableCell>
-          {Array.from({ length: 4 }, (_, i) => (
-            <TableCell key={i}>
-              {productionData.reduce((acc, cur) => acc + cur.amounts[i], 0)}
-            </TableCell>
+        </TableHeader>
+        <TableBody>
+          {productionValues.map((data, index) => (
+            <TableRow key={index}>
+              <TableCell>{data.product}</TableCell>
+              {data.amounts.map((amount, periodOffset) => (
+                <TableCell key={periodOffset}>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => handleInputChange(index, periodOffset, e.target.value)}
+                  />
+                </TableCell>
+              ))}
+            </TableRow>
           ))}
-        </TableRow>
-      </TableFooter>
-    </Table>
+        </TableBody>
+      </Table>
+
+      {/* Tabelle für geplante Lagerbestände */}
+      <Table>
+        <TableCaption>Geplante Lagerbestände am Ende jeder Periode</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Produkt</TableHead>
+            {Array.from({ length: 4 }, (_, i) => <TableHead key={i}>Periode {+ currentPeriod + i}</TableHead>)}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {plannedStocks.map((data, index) => (
+            <TableRow key={index}>
+              <TableCell>{data.product}</TableCell>
+              {data.amounts.map((stock, periodOffset) => <TableCell key={periodOffset}>{stock}</TableCell>)}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

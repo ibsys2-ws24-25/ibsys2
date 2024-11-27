@@ -1,6 +1,6 @@
 import PurchaseTable from "@/components/pages/purchase/purchaseTable";
 import { getPurchaseParts } from "@/lib/prodUtils";
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { notFound } from "next/navigation";
 
 async function getPeriod(id: number): Promise<PeriodWithRelations> {
@@ -31,11 +31,16 @@ type PeriodWithRelations = Prisma.PeriodGetPayload<{
 
 export default async function HomePage({ params }: { params: { periodId: number }}) {
     const period = await getPeriod(params.periodId);
-    const purchaseParts = getPurchaseParts(period.Warehouse)
-
+    const purchaseParts = getPurchaseParts(period.Warehouse);
+    const prisma = new PrismaClient();
+    const orders = await prisma.order.findMany({
+        where: {
+            orderPeriod: Number(params.periodId),
+        }
+    })
     return (
         <div>
-            <PurchaseTable purchaseParts={ purchaseParts } periodId={params.periodId}/>
+            <PurchaseTable orders={ orders } purchaseParts={ purchaseParts } periodId={params.periodId}/>
         </div>
     );
 }

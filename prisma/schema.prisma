@@ -17,6 +17,9 @@ model Material {
   Warehouse           Warehouse[]
   Forecast            Forecast[]
   ProductionPlan      ProductionPlanDecision[]
+  deliveryTime        Float?
+  variance            Float?
+  Order               Order[]
 }
 
 model MaterialRequirement {
@@ -65,6 +68,16 @@ model ProductionPlanDecision {
   productId   String
 
   @@unique([periodId, materialId, productId])
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  orderId     Int
+  orderPeriod Int
+  mode        Int
+  Material    Material @relation(fields: [materialId], references: [id])
+  amount      Int 
+  materialId  String
 }
 
 model Setting {

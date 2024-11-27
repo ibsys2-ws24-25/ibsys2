@@ -41,6 +41,14 @@ export interface ProductionPlanMultipliers {
     amount: number;
 }
 
+export interface PurchaseParts {
+    materialId: string;
+    warehouseStock: number;
+    defaultStock: number;
+    deliveryTime: number;
+    variance: number;
+}
+
 export function getMaterial(materials: MaterialWithRelations[], id: string) {
     for (const material of materials) {
         if (material.id === id) {
@@ -59,6 +67,24 @@ export function getWarehouseByMaterialId(warehouse: WarehouseWithRelations[], id
     }
 
     return null;
+}
+
+export function getPurchaseParts(warehouse: WarehouseWithRelations[]) {
+    const purchaseParts: PurchaseParts[] = [];
+    
+    for (const material of warehouse) {
+        if (material.materialId.includes("K")) {
+            purchaseParts.push({
+                materialId: material.materialId,
+                warehouseStock: material.amount,
+                defaultStock: material.Material.defaultStock,
+                deliveryTime: material.Material.deliveryTime || 0,
+                variance: material.Material.variance || 0,
+            });
+        }
+    }
+
+    return purchaseParts;
 }
 
 export function getForecastForMaterialAndPeriod(forecasts: ForecastWithRelations[], materialId: string, periodId: number) {

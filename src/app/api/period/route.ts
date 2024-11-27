@@ -131,13 +131,43 @@ export async function POST(request: Request) {
                 }
             }
 
-            /*
             if (results.futureinwardstockmovement) {
                 const futureinwardstockmovement = results.futureinwardstockmovement[0].order;
-
-                console.log(futureinwardstockmovement);
+            
+                const ordersToCreate = [];
+            
+                for (const order of futureinwardstockmovement) {
+                    const materialId = order.$.article;
+                    const material = await prisma.material.findFirst({
+                        where: {
+                            id: {
+                                contains: materialId
+                            }
+                        }
+                    })
+            
+                    if (material) {
+                        ordersToCreate.push({
+                            orderId: Number(order.$.id),
+                            orderPeriod: Number(order.$.orderperiod),
+                            mode: Number(order.$.mode),
+                            amount: Number(order.$.amount),
+                            materialId: material.id,
+                        });
+                    } else {
+                        console.warn(`Material ID ${materialId} does not exist. Skipping order.`);
+                    }
+                }
+            
+                if (ordersToCreate.length > 0) {
+                    await prisma.order.createMany({
+                        data: ordersToCreate,
+                    });
+                    console.log(`${ordersToCreate.length} orders successfully saved to the database.`);
+                } else {
+                    console.warn('No valid orders to save.');
+                }
             }
-            */
         }
         
         return NextResponse.json(

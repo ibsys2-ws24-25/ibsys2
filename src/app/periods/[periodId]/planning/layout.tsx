@@ -12,7 +12,7 @@ export default function RootLayout({
 }>) {
   return (
     <div className="w-full">
-        <div className="flex justify-center align-center">
+        <div className="flex justify-center align-center m-5 mt-0">
             <ProductionPlanNavigation />
         </div>
         <div className="m-5">

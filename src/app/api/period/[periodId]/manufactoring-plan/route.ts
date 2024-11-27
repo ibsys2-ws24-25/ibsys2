@@ -63,7 +63,10 @@ export async function GET(request: Request, { params }: { params: { periodId: st
 
         console.log(`Default Stock Value: ${defaultStockSetting?.value}`);
 
-        const productionRelations = getProductionPlan(materials, warehouseStock, forecast, params.productId, Number(params.periodId) + 1);
+        const productionRelationsP1 = getProductionPlan(materials, warehouseStock, forecast, "P1", Number(params.periodId) + 1);
+        const productionRelationsP2 = getProductionPlan(materials, warehouseStock, forecast, "P2", Number(params.periodId) + 1);
+        const productionRelationsP3 = getProductionPlan(materials, warehouseStock, forecast, "P3", Number(params.periodId) + 1);
+        const productionRelations = productionRelationsP1.concat(productionRelationsP2).concat(productionRelationsP3);
         console.log(`Num Production Relations: ${productionRelations.length}`);
 
         // Create result list

@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ForecastTable } from "@/components/pages/forecast/forecastTable";
 import { ProductionTable } from "@/components/pages/forecast/productionPlan";
+import { Button } from "@/components/ui/button"
 
 type DataWithAmounts = {
   product: string;
@@ -61,6 +62,12 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
   }, [calculatePlannedStocks, forecastData]);
 
   const saveProductionData = useCallback(async () => {
+    const anyNegative = plannedStocks.some(item => item.amounts.some(amount => amount < 0));
+    if (anyNegative) {
+      alert("Cannot save: One or more planned stocks are below zero.");
+      return;
+    }
+
     plannedStocks.forEach(async (item) => {
       const materialId = item.product.split(':')[0]; // Extrahieren des Material-IDs
       item.amounts.forEach(async (safetyStock, index) => {
@@ -95,7 +102,7 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
             plannedStocks={plannedStocks} 
             handleProductionDataChange={handleProductionDataChange} 
           />
-          <button onClick={saveProductionData}>Save Production Data</button>
+          <Button onClick={saveProductionData}>Save</Button>
       </div>
   );
 }

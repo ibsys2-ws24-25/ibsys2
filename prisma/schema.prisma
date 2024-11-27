@@ -17,6 +17,8 @@ model Material {
   Warehouse           Warehouse[]
   Forecast            Forecast[]
   ProductionPlan      ProductionPlanDecision[]
+  deliveryTime        Float?
+  variance            Float?
 }
 
 model MaterialRequirement {

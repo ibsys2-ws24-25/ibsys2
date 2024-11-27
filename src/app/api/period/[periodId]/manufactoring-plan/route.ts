@@ -85,6 +85,18 @@ interface WarehouseStock {
     amount: number;
 }
 
+const getRelationsForMaterial = (materialId: string, materials: MaterialWithRelations[]): Relation[] => {
+    const material = materials.find((mat) => mat.id === materialId);
+    if (!material || !material.MaterialsRequired) {
+        return [];
+    }
+
+    return material.MaterialsRequired.map((required) => ({
+        materialId: required.RequiredMaterial.id,
+        amount: required.sum,
+    }));
+};
+
 // Process material relations recursively
 const processRelations = (
     relations: Relation[],
@@ -92,7 +104,8 @@ const processRelations = (
     productionDecisions: ProductionPlanDecision[],
     warehouseStock: WarehouseStock[],
     defaultStockSetting: number,
-    productionValue: number
+    productionValue: number,
+    getRelationsForMaterial: (materialId: string) => Relation[] // Hilfsfunktion, um Relationen zu holen
 ) => {
     relations.forEach((relation) => {
         if (relation.materialId.includes("E") && !manufacturingPlan.has(relation.materialId)) {
@@ -108,7 +121,22 @@ const processRelations = (
 
             // Only set if production is required
             if (materialRequirement < 0) {
-                manufacturingPlan.set(relation.materialId, Math.abs(materialRequirement));
+                const requiredProduction = Math.abs(materialRequirement);
+                manufacturingPlan.set(relation.materialId, requiredProduction);
+
+                // Rekursiv: Verarbeite weitere Relationen, falls das Material selbst weitere Relationen benötigt
+                const subRelations = getRelationsForMaterial(relation.materialId);
+                if (subRelations.length > 0) {
+                    processRelations(
+                        subRelations,
+                        manufacturingPlan,
+                        productionDecisions,
+                        warehouseStock,
+                        defaultStockSetting,
+                        requiredProduction,
+                        getRelationsForMaterial
+                    );
+                }
             }
         }
     });
@@ -177,7 +205,8 @@ export async function GET(request: Request, { params }: { params: { periodId: st
                             productionDecisions,
                             warehouseStock,
                             Number(defaultStockSetting?.value),
-                            productionValue
+                            productionValue,
+                            (materialId) => getRelationsForMaterial(materialId, materials) // Neue Hilfsfunktion
                         );
                     }
                 } else {

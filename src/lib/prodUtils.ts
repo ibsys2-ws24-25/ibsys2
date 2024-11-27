@@ -45,7 +45,8 @@ export interface PurchaseParts {
     materialId: string;
     warehouseStock: number;
     defaultStock: number;
-    // usage: string; //ToDo: calculate
+    deliveryTime: number;
+    variance: number;
 }
 
 export function getMaterial(materials: MaterialWithRelations[], id: string) {
@@ -70,13 +71,15 @@ export function getWarehouseByMaterialId(warehouse: WarehouseWithRelations[], id
 
 export function getPurchaseParts(warehouse: WarehouseWithRelations[]) {
     const purchaseParts: PurchaseParts[] = [];
-
+    
     for (const material of warehouse) {
         if (material.materialId.includes("K")) {
             purchaseParts.push({
                 materialId: material.materialId,
                 warehouseStock: material.amount,
-                defaultStock: material.Material.defaultStock
+                defaultStock: material.Material.defaultStock,
+                deliveryTime: material.Material.deliveryTime || 0,
+                variance: material.Material.variance || 0,
             });
         }
     }

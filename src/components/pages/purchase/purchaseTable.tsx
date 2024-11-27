@@ -18,9 +18,6 @@ const PurchaseTable = ({ purchaseParts, periodId }: PurchaseTableProps) => {
             <TableHead>Nr. Kaufteil</TableHead>
             <TableHead>Lieferfrist</TableHead>
             <TableHead>Abweichung</TableHead>
-            <TableHead>P1</TableHead>
-            <TableHead>P2</TableHead>
-            <TableHead>P3</TableHead>
             <TableHead>Diskontmenge</TableHead>
             <TableHead>Lagerbestand</TableHead>
             <TableHead>
@@ -65,19 +62,10 @@ const PurchaseTable = ({ purchaseParts, periodId }: PurchaseTableProps) => {
                         {material.materialId}
                     </TableCell>
                     <TableCell>
-                        ToDO
+                        {material.deliveryTime}
                     </TableCell>
                     <TableCell>
-                        ToDo
-                    </TableCell>
-                    <TableCell>
-                        1
-                    </TableCell>
-                    <TableCell>
-                        2
-                    </TableCell>
-                    <TableCell>
-                        3
+                        {material.variance}
                     </TableCell>
                     <TableCell>
                         {material.defaultStock}

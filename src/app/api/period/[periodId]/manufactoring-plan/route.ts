@@ -5,8 +5,8 @@ import { findDecision } from '@/lib/manufactoringUtils';
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request, { params }: { params: { periodId: string, productId: string } }) {
-    console.log(`Fetching production plan for ${params.periodId} and product ${params.productId}`);
+export async function GET(request: Request, { params }: { params: { periodId: string } }) {
+    console.log(`Fetching production plan for ${params.periodId}`);
     try {
         // Fetch required items from db
         const productionDescicions = await prisma.productionPlanDecision.findMany({

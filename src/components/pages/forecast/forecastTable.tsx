@@ -11,7 +11,7 @@ import {
 
 interface DataWithAmounts {
   product: string;
-  amounts: number[]; // [Periode N, Periode N+1, Periode N+2, Periode N+3]
+  amounts: number[];
 }
 
 interface ForecastTableProps {
@@ -30,7 +30,7 @@ export function ForecastTable({ currentPeriod, data, updateData }: ForecastTable
           }
         : item
     );
-    updateData(updatedForecastData); // Übergibt die geänderten Daten an HomePage
+    updateData(updatedForecastData);
   };
 
   return (

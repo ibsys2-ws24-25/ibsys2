@@ -26,7 +26,6 @@ export async function POST(request: Request, { params }: { params: { periodId: s
     const { materialId, productId, safetyStock, forPeriod} = await request.json();
     console.log(`Received data - PeriodID: ${params.periodId}, MaterialID: ${materialId}, ProductID: ${productId}, SafetyStock: ${safetyStock}, ForPeriod: ${forPeriod}`);
 
-    // Prüfen, ob die Periode existiert
     const periodExists = await prisma.period.findUnique({
       where: { id: Number(params.periodId) }
     });

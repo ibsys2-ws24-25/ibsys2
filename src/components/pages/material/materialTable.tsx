@@ -3,8 +3,9 @@
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { ProductionPlan } from "@/lib/prodUtils";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ProductionPlanDecision } from "@prisma/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface MaterialTableProps {
     productionPlan: ProductionPlan[];
@@ -20,7 +21,9 @@ interface SafetyStockInputValue {
 }
 
 const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productId, decisions }: MaterialTableProps) => {
-    const [isUpdating, setIsUpdating] = useState<boolean>(false);
+    const [isUpdating, setIsUpdating] = useState<boolean>(true);
+    const [productionPlanInit, setProductionPlanInit] = useState<boolean>(true);
+    const [fetchedProductionPlan, setFetchedProductionPlan] = useState<Map<string, number> | undefined>(undefined);
     const [safetyStockInputValues, setSafetyStockInputValues] = useState<SafetyStockInputValue[]>(
         decisions.map((decision) => ({ materialId: decision.materialId, value: decision.safetyStock }))
     );
@@ -67,6 +70,7 @@ const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productI
             console.error("Error setting decision:", error);
             alert("Error setting decision. Please try again.");
         } finally {
+            fetchProductionPlan();
             setIsUpdating(false);
         }
     };
@@ -75,6 +79,34 @@ const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productI
         const decision = decisions.find((d) => d.materialId === materialId);
         return decision ? decision.safetyStock : parseInt(defaultStockSetting, 10);
     };
+
+    const fetchProductionPlan = useCallback(async () => {
+        try {
+            const response = await fetch(`/api/period/${periodId}/manufactoring-plan/`, {
+                method: "GET",
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch production plan.");
+            }
+
+            const data = await response.json();
+
+            const productionPlanMap = new Map<string, number>(Object.entries(data));
+            setFetchedProductionPlan(productionPlanMap);
+        } catch (error) {
+            console.error("Error fetching production plan:", error);
+            alert("Error fetching production plan. Please try again.");
+        }
+    }, [periodId]);
+
+    useEffect(() => {
+        if (productionPlanInit) {
+            fetchProductionPlan();
+            setProductionPlanInit(false);
+            setIsUpdating(false);
+        }
+    }, [fetchProductionPlan, productionPlanInit, setProductionPlanInit]);
 
     return (
         <div className="overflow-x-auto">
@@ -128,7 +160,12 @@ const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productI
                                 {material.workInProgress}
                             </TableCell>
                             <TableCell>
-                                {"To calc"}
+                                {
+                                    isUpdating ? (
+                                        <Skeleton className="w-[50px] h-[20px]" />
+                                    ) :
+                                    fetchedProductionPlan?.has(material.materialId) ? fetchedProductionPlan.get(material.materialId) : 0
+                                }
                             </TableCell>
                         </TableRow>
                     ))}

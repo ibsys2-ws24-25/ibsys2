@@ -166,7 +166,7 @@ export async function GET(request: Request, { params }: { params: { periodId: st
 
         // Create result list
         const manufacturingPlan = new Map<string, number>();
-        const predictionValue = 100;
+        const predictionValue = 100; // ToDo: Abrufen aus DB
 
         console.log("--------");
         // Calculate the manufacturing plan

@@ -24,7 +24,7 @@ export async function GET(request: Request, { params }: { params: { periodId: st
 export async function POST(request: Request, { params }: { params: { periodId: string } }) {
   try {
     const { materialId, productId, safetyStock, forPeriod} = await request.json();
-    console.log(`Received data - PeriodID: ${params.periodId}, MaterialID: ${materialId}, ProductID: ${productId}, SafetyStock: ${safetyStock}`);
+    console.log(`Received data - PeriodID: ${params.periodId}, MaterialID: ${materialId}, ProductID: ${productId}, SafetyStock: ${safetyStock}, ForPeriod: ${forPeriod}`);
 
     // Prüfen, ob die Periode existiert
     const periodExists = await prisma.period.findUnique({
@@ -67,7 +67,8 @@ export async function POST(request: Request, { params }: { params: { periodId: s
           periodId: Number(params.periodId),
           materialId,
           safetyStock,
-          productId
+          productId,
+          forPeriod,
         },
       });
     }

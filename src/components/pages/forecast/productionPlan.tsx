@@ -83,7 +83,14 @@ export function ProductionTable({ currentPeriod, productionData, plannedStocks, 
           {plannedStocks.map((data, index) => (
             <TableRow key={index}>
               <TableCell>{data.product}</TableCell>
-              {data.amounts.map((stock, periodOffset) => <TableCell key={periodOffset}>{stock}</TableCell>)}
+              {data.amounts.map((stock, periodOffset) => (
+                <TableCell
+                  key={periodOffset}
+                  className={stock < 0 ? "bg-red-500 text-white" : ""}
+                >
+                  {stock}
+                </TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>

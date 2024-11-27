@@ -49,13 +49,15 @@ export function ForecastTable({ currentPeriod, data, updateData }: ForecastTable
           <TableRow key={index}>
             <TableCell>{item.product}</TableCell>
             {item.amounts.map((amount, periodOffset) => (
-              <TableCell key={periodOffset}>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => handleInputChange(index, periodOffset, e.target.value)}
-                />
-              </TableCell>
+              periodOffset === 0 ?
+                <TableCell key={periodOffset}>{amount}</TableCell> :
+                <TableCell key={periodOffset}>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => handleInputChange(index, periodOffset, e.target.value)}
+                  />
+                </TableCell>
             ))}
           </TableRow>
         ))}

@@ -74,7 +74,7 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
             materialId,
             productId: item.product,
             safetyStock,
-            forPeriod
+            forPeriod // Hinzufügen der berechneten forPeriod
           }),
         });
   
@@ -83,7 +83,8 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
         }
       });
     });
-  }, [plannedStocks, params.periodId]);  
+  }, [plannedStocks, params.periodId]);
+  
   
   return (
       <div>

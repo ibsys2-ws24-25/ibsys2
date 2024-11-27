@@ -1,193 +1,199 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, ProductionPlanDecision } from '@prisma/client';
 import { getProductionPlan } from '@/lib/prodUtils';
 import { findDecision } from '@/lib/manufactoringUtils';
 
 const prisma = new PrismaClient();
 
+// Fetch data from the database
+const fetchFromDatabase = async (prisma: PrismaClient, params: { periodId: string }) => {
+    const periodId = Number(params.periodId);
+    return {
+        productionDecisions: await prisma.productionPlanDecision.findMany({ where: { periodId } }),
+        materials: await prisma.material.findMany({
+            include: {
+                MaterialsRequired: { include: { RequiredMaterial: true } },
+                MaterialsRequiredBy: { include: { Material: true } },
+            },
+        }),
+        warehouseStock: await prisma.warehouse.findMany({
+            where: { periodId },
+            include: { Material: true },
+        }),
+        forecast: await prisma.forecast.findMany({
+            where: { periodId, forPeriod: periodId + 1 },
+            include: { Material: true },
+        }),
+        defaultStockSetting: await prisma.setting.findUnique({ where: { name: 'safety_stock_default' } }),
+    };
+};
+
+type MaterialWithRelations = Prisma.MaterialGetPayload<{
+    include: {
+        MaterialsRequired: {
+          include: {
+            RequiredMaterial: true,
+          },
+        },
+        MaterialsRequiredBy: {
+          include: {
+            Material: true,
+          },
+        },
+    },
+}>;
+
+type WarehouseWithRelations = Prisma.WarehouseGetPayload<{
+    include: {
+        Material: true,
+    };
+}>;
+
+type ForecastWithRelations = Prisma.ForecastGetPayload<{
+    include: {
+        Material: true,
+    };
+}>;
+
+// Get production relations for all products
+const getProductionRelations = (
+    materials: MaterialWithRelations[],
+    warehouseStock: WarehouseWithRelations[],
+    forecast: ForecastWithRelations[],
+    periodId: number
+) => {
+    const products = ["P1", "P2", "P3"];
+    return products.flatMap((productId) =>
+        getProductionPlan(materials, warehouseStock, forecast, productId, periodId)
+    );
+};
+
+// Calculate material requirement
+const calculateMaterialRequirement = (
+    stockAmount: number,
+    safetyStock: number,
+    predictionValue: number
+) => stockAmount - safetyStock - predictionValue;
+
+interface Relation {
+    materialId: string;
+    amount: number;
+}
+
+interface WarehouseStock {
+    Material: { id: string };
+    amount: number;
+}
+
+// Process material relations recursively
+const processRelations = (
+    relations: Relation[],
+    manufacturingPlan: Map<string, number>,
+    productionDecisions: ProductionPlanDecision[],
+    warehouseStock: WarehouseStock[],
+    defaultStockSetting: number,
+    productionValue: number
+) => {
+    relations.forEach((relation) => {
+        if (relation.materialId.includes("E") && !manufacturingPlan.has(relation.materialId)) {
+            // Find safety stock decision for relation material
+            const safetyStock = findDecision(productionDecisions, relation.materialId) || defaultStockSetting;
+
+            // Find the current warehouse stock for relation material
+            const stockEntry = warehouseStock.find((stock) => stock.Material.id === relation.materialId);
+            const stockAmount = stockEntry ? stockEntry.amount : 0;
+
+            // Calculate material requirement
+            const materialRequirement = stockAmount - safetyStock - relation.amount * productionValue;
+
+            // Only set if production is required
+            if (materialRequirement < 0) {
+                manufacturingPlan.set(relation.materialId, Math.abs(materialRequirement));
+            }
+        }
+    });
+};
+
 export async function GET(request: Request, { params }: { params: { periodId: string } }) {
     console.log(`Fetching production plan for ${params.periodId}`);
     try {
         // Fetch required items from db
-        const productionDescicions = await prisma.productionPlanDecision.findMany({
-            where: {
-                periodId: Number(params.periodId),
-            },
-        });
+        const { productionDecisions, materials, warehouseStock, forecast, defaultStockSetting } =
+            await fetchFromDatabase(prisma, params);
 
-        console.log(`Num Safety Stock Decisions: ${productionDescicions.length}`);
-
-        const materials = await prisma.material.findMany({
-            include: {
-                MaterialsRequired: {
-                    include: {
-                    RequiredMaterial: true,
-                    },
-                },
-                MaterialsRequiredBy: {
-                    include: {
-                    Material: true,
-                    },
-                },
-            },
-        });
-
+        console.log(`Num Safety Stock Decisions: ${productionDecisions.length}`);
         console.log(`Num Materials: ${materials.length}`);
-
-        const warehouseStock = await prisma.warehouse.findMany({
-            where: {
-                periodId: Number(params.periodId),
-            },
-            include: {
-                Material: true,
-            },
-        });
-
         console.log(`Num Warehouse Entries: ${warehouseStock.length}`);
-
-        const forecast = await prisma.forecast.findMany({
-            where: {
-                periodId: Number(params.periodId),
-                forPeriod: Number(params.periodId) + 1,
-            },
-            include: {
-                Material: true,
-            },
-        });
-
         console.log(`Num Forecast Entries: ${forecast.length}`);
-
-        const defaultStockSetting = await prisma.setting.findUnique({
-            where: { name: 'safety_stock_default' },
-        });
-
         console.log(`Default Stock Value: ${defaultStockSetting?.value}`);
 
-        const productionRelationsP1 = getProductionPlan(materials, warehouseStock, forecast, "P1", Number(params.periodId) + 1);
-        const productionRelationsP2 = getProductionPlan(materials, warehouseStock, forecast, "P2", Number(params.periodId) + 1);
-        const productionRelationsP3 = getProductionPlan(materials, warehouseStock, forecast, "P3", Number(params.periodId) + 1);
-        const productionRelations = productionRelationsP1.concat(productionRelationsP2).concat(productionRelationsP3);
+        // Generate production relations for P1, P2, and P3
+        const productionRelations = getProductionRelations(
+            materials,
+            warehouseStock,
+            forecast,
+            Number(params.periodId) + 1
+        );
         console.log(`Num Production Relations: ${productionRelations.length}`);
 
         // Create result list
         const manufacturingPlan = new Map<string, number>();
-
-        // Mock data || ToDo: fetch real Data from ahmads work
         const predictionValue = 100;
 
         console.log("--------");
-        // Calc the manufactoring plan
+        // Calculate the manufacturing plan
         for (const productionElement of productionRelations) {
             console.log(`Creating plan for ${productionElement.materialId}`);
             // Find safety stock decision for material
-            let safetyStockDecision = findDecision(productionDescicions, productionElement.materialId);
-            if (!safetyStockDecision) {
-                safetyStockDecision = Number(defaultStockSetting?.value);
-            }
+            const safetyStockDecision = findDecision(productionDecisions, productionElement.materialId) || Number(defaultStockSetting?.value);
 
-            console.log(`Safety Stock for ${productionElement.materialId} id ${safetyStockDecision}`);
+            console.log(`Safety Stock for ${productionElement.materialId} is ${safetyStockDecision}`);
 
             // Find the current warehouse stock for this material
-            const stockEntry = warehouseStock.find(stock => stock.Material.id === productionElement.materialId);
+            const stockEntry = warehouseStock.find((stock) => stock.Material.id === productionElement.materialId);
+            const stockAmount = stockEntry ? stockEntry.amount : 0;
 
-            // Get the actual stock amount or fallback to 0 if not found
-            const currentStock = stockEntry ? stockEntry.amount : 0;
+            console.log(`Current Stock for ${productionElement.materialId} is ${stockAmount}`);
 
-            console.log(`Current Stock for ${productionElement.materialId} id ${currentStock}`);
-
-            // Calc the end products first
+            // Calculate the end products first
             if (productionElement.materialId.includes("P")) {
-                // Set the production amount
-                const materialRequirement = currentStock - safetyStockDecision - predictionValue;
-                console.log(`Material Requirement for ${productionElement.materialId} id ${materialRequirement}`)
+                const materialRequirement = calculateMaterialRequirement(
+                    stockAmount,
+                    safetyStockDecision,
+                    predictionValue
+                );
+
+                console.log(`Material Requirement for ${productionElement.materialId} is ${materialRequirement}`);
                 if (materialRequirement < 0) {
                     const productionValue = Math.abs(materialRequirement);
                     manufacturingPlan.set(productionElement.materialId, productionValue);
 
-                    // Set Production relations
-                    const relations = productionRelations.find(material => material.materialId === productionElement.materialId)?.relations;
-
+                    // Process relations for sub-materials
+                    const relations = productionElement.relations;
                     if (relations) {
-                        for (const relation of relations) {
-                            if (relation.materialId.includes("E")) {
-                                if (!manufacturingPlan.has(relation.materialId)) {
-                                    let safetyStockDecisionRelation = findDecision(productionDescicions, relation.materialId);
-                                    if (!safetyStockDecisionRelation) {
-                                        safetyStockDecisionRelation = Number(defaultStockSetting?.value);
-                                    }
-
-                                    // Find the current warehouse stock for relation material
-                                    const stockEntryRelation = warehouseStock.find(stock => stock.Material.id === relation.materialId);
-
-                                    // Get the actual stock amount or fallback to 0 if not found
-                                    const currentStockRelation = stockEntryRelation ? stockEntryRelation.amount : 0;
-
-                                    const materialRequirementRelation = currentStockRelation - safetyStockDecisionRelation - (relation.amount * productionValue);
-
-                                    // Only set if production is required
-                                    if (materialRequirementRelation < 0) {
-                                        manufacturingPlan.set(relation.materialId, Math.abs(materialRequirementRelation));
-                                    }
-                                }
-                            }
-                        }
+                        processRelations(
+                            relations,
+                            manufacturingPlan,
+                            productionDecisions,
+                            warehouseStock,
+                            Number(defaultStockSetting?.value),
+                            productionValue
+                        );
                     }
                 } else {
                     manufacturingPlan.set(productionElement.materialId, 0);
                 }
-            } else {
-                if (productionElement.materialId.includes("E")) {
-                    if (!manufacturingPlan.has(productionElement.materialId)) {
-                        const materialRequirement = currentStock - safetyStockDecision;
-
-                        if (materialRequirement < 0) {
-                            // We want to increase our safety stock --> Produce material
-                            const productionValue = Math.abs(materialRequirement);
-                            manufacturingPlan.set(productionElement.materialId, productionValue);
-
-                            // Add relations because we want to produce
-                            const relations = productionRelations.find(material => material.materialId === productionElement.materialId)?.relations;
-                            if (relations) {
-                                for (const relation of relations) {
-                                    if (relation.materialId.includes("E")) {
-                                        if (!manufacturingPlan.has(relation.materialId)) {
-                                            let safetyStockDecisionRelation = findDecision(productionDescicions, relation.materialId);
-                                            if (!safetyStockDecisionRelation) {
-                                                safetyStockDecisionRelation = Number(defaultStockSetting?.value);
-                                            }
-        
-                                            // Find the current warehouse stock for relation material
-                                            const stockEntryRelation = warehouseStock.find(stock => stock.Material.id === relation.materialId);
-        
-                                            // Get the actual stock amount or fallback to 0 if not found
-                                            const currentStockRelation = stockEntryRelation ? stockEntryRelation.amount : 0;
-        
-                                            const materialRequirementRelation = currentStockRelation - safetyStockDecisionRelation - (relation.amount * productionValue);
-        
-                                            // Only set if production is required
-                                            if (materialRequirementRelation < 0) {
-                                                manufacturingPlan.set(relation.materialId, Math.abs(materialRequirementRelation));
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
 
-        // Map in ein einfaches Objekt umwandeln
-        const mapToObject = (map: Map<string, number>): object => {
-            return Object.fromEntries(map);
-        };
+        // Convert Map to plain object for JSON response
+        const mapToObject = (map: Map<string, number>): object => Object.fromEntries(map);
 
-        // Rückgabe als JSON-Response
+        // Return the result
         return NextResponse.json(mapToObject(manufacturingPlan), { status: 200 });
     } catch (error) {
-        console.error("Error fetching manufactoring plan:", error);
-        return NextResponse.json({ error: "Error fetching manufactoring plan" }, { status: 500 });
+        console.error("Error fetching manufacturing plan:", error);
+        return NextResponse.json({ error: "Error fetching manufacturing plan" }, { status: 500 });
     } finally {
         await prisma.$disconnect();
     }

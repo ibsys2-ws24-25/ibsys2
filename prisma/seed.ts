@@ -246,6 +246,20 @@ async function main() {
         { name: "planspiel_game", value: "217" },
         { name: "planspiel_group", value: "2" },
     ];
+    try {
+        await prisma.setting.createMany({
+            data: settings,
+        });
+    } catch (error: unknown) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2002') {
+                console.error("Settings already added. Skipping...");
+            } else {
+                console.error("An unexpected error occurred:", error);
+                throw error;
+            }
+        }
+    }
 
     await prisma.setting.createMany({
         data: settings,

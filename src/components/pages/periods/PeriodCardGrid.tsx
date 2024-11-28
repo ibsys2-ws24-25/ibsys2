@@ -53,7 +53,12 @@ export default function PeriodCardGrid({ periods }: PeriodTableProps) {
                                     View Period
                                 </Link>
                             </Button>
-                            <Button variant="outline" className="w-full mt-1">
+                            <Button variant="outline" className="w-full mt-2">
+                                <Link href={`/periods/${period.id}/planning/forecast`}>
+                                    Forecasts
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full mt-2">
                                 <Link href={`/periods/${period.id}/planning/production/1`}>
                                     Plan Production P1
                                 </Link>

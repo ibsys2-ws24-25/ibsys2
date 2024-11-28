@@ -3,27 +3,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { ForecastTable } from "@/components/pages/forecast/forecastTable";
 import { ProductionTable } from "@/components/pages/forecast/productionPlan";
 import { Button } from "@/components/ui/button"
-import { Prisma } from '@prisma/client';
 
 type DataWithAmounts = {
   product: string;
   amounts: number[];
 };
-
-type PeriodWithRelations = Prisma.PeriodGetPayload<{
-    include: {
-        Warehouse: {
-            include: {
-                Material: true,
-            },
-        },
-        Forecast: {
-            include: {
-                Material: true,
-            },
-        },
-    };
-}>;
 
 export default function HomePage({ params }: { params: { periodId: number } }) {
   const [forecastData, setForecastData] = useState<DataWithAmounts[]>([]);
@@ -33,6 +17,27 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
       { product: "P3: Men's bicycle", amounts: [150, 100, 100, 100] }
   ]);
   const [plannedStocks, setPlannedStocks] = useState<DataWithAmounts[]>([]);
+
+  useEffect(() => {
+    async function fetchForecastData() {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${params.periodId}`, {
+            cache: 'no-store',
+        });
+        if (!response.ok) {
+            console.error('Failed to fetch period data');
+            return;
+        }
+        const data = await response.json();
+        const formattedData = data.Forecast.map((f:{ Material: { id: string; name: string; }, amount: string }) => ({
+            product: f.Material.id + ": " + f.Material.name,
+            amounts: [parseInt(f.amount), 0, 0, 0]
+        }));
+        setForecastData(formattedData);
+        calculatePlannedStocks(formattedData, productionData); // Initial calculation
+    }
+
+    fetchForecastData();
+  }, [params.periodId]);
 
   const calculatePlannedStocks = useCallback((forecast = forecastData, production = productionData) => {
     const newPlannedStocks = production.map(prod => {
@@ -45,28 +50,6 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
 
     setPlannedStocks(newPlannedStocks);
   }, [forecastData, productionData]);
-
-  useEffect(() => {
-    async function fetchForecastData() {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${params.periodId}`, {
-            cache: 'no-store',
-        });
-        if (!response.ok) {
-            console.error('Failed to fetch period data');
-            return;
-        }
-        const data: PeriodWithRelations = await response.json();
-        const formattedData = data.Forecast.map(f => ({
-            product: f.Material.id + ": " + f.Material.name,
-            amounts: [f.amount, 0, 0, 0]
-        }));
-        setForecastData(formattedData);
-        calculatePlannedStocks(formattedData, productionData); // Initial calculation
-    }
-
-    fetchForecastData();
-  }, [params.periodId, calculatePlannedStocks, productionData]);
-
 
   const handleForecastDataChange = useCallback((newData: DataWithAmounts[]) => {
     setForecastData(newData);
@@ -88,7 +71,7 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
     plannedStocks.forEach(async (item) => {
       const materialId = item.product.split(':')[0]; // Extrahieren des Material-IDs
       item.amounts.forEach(async (safetyStock, index) => {
-        const periodId = params.periodId; // Die aktuelle Periode aus der URL
+        const periodId = parseInt(String(params.periodId)); // Die aktuelle Periode aus der URL
         const forPeriod = periodId + index; // Berechnen der Zielperiode basierend auf dem Index
         const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${periodId.toString()}/production`; // POST-URL
         const response = await fetch(url, {

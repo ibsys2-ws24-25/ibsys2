@@ -34,6 +34,18 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
   ]);
   const [plannedStocks, setPlannedStocks] = useState<DataWithAmounts[]>([]);
 
+  const calculatePlannedStocks = useCallback((forecast = forecastData, production = productionData) => {
+    const newPlannedStocks = production.map(prod => {
+        const forecastItem = forecast.find(f => f.product === prod.product);
+        return {
+            product: prod.product,
+            amounts: prod.amounts.map((amount, index) => amount - (forecastItem ? forecastItem.amounts[index] : 0))
+        };
+    });
+
+    setPlannedStocks(newPlannedStocks);
+  }, [forecastData, productionData]);
+
   useEffect(() => {
     async function fetchForecastData() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${params.periodId}`, {
@@ -53,19 +65,8 @@ export default function HomePage({ params }: { params: { periodId: number } }) {
     }
 
     fetchForecastData();
-  }, [params.periodId]);
+  }, [params.periodId, calculatePlannedStocks, productionData]);
 
-  const calculatePlannedStocks = useCallback((forecast = forecastData, production = productionData) => {
-    const newPlannedStocks = production.map(prod => {
-        const forecastItem = forecast.find(f => f.product === prod.product);
-        return {
-            product: prod.product,
-            amounts: prod.amounts.map((amount, index) => amount - (forecastItem ? forecastItem.amounts[index] : 0))
-        };
-    });
-
-    setPlannedStocks(newPlannedStocks);
-  }, [forecastData, productionData]);
 
   const handleForecastDataChange = useCallback((newData: DataWithAmounts[]) => {
     setForecastData(newData);

@@ -20,16 +20,28 @@ export async function GET(request: Request, { params }: { params: { periodId: st
   }
 }
 
+//productiinPlanDecision
 export async function POST(request: Request, { params }: { params: { periodId: string } }) {
   try {
-    const { materialId, productId, safetyStock } = await request.json();
+    const { materialId, productId, safetyStock, forPeriod} = await request.json();
+    console.log(`Received data - PeriodID: ${params.periodId}, MaterialID: ${materialId}, ProductID: ${productId}, SafetyStock: ${safetyStock}, ForPeriod: ${forPeriod}`);
+
+    const periodExists = await prisma.period.findUnique({
+      where: { id: Number(params.periodId) }
+    });
+
+    if (!periodExists) {
+      console.error(`Period with ID ${params.periodId} does not exist.`);
+      return NextResponse.json({ error: "Period not found" }, { status: 404 });
+    }
 
     let decision = await prisma.productionPlanDecision.findUnique({
       where: {
-        periodId_materialId_productId: {
+        periodId_materialId_productId_forPeriod: {
           periodId: Number(params.periodId),
           materialId,
           productId,
+          forPeriod,
         },
       },
     });
@@ -37,10 +49,11 @@ export async function POST(request: Request, { params }: { params: { periodId: s
     if (decision) {
       decision = await prisma.productionPlanDecision.update({
         where: {
-            periodId_materialId_productId: {
+            periodId_materialId_productId_forPeriod: {
                 periodId: Number(params.periodId),
                 materialId,
                 productId,
+                forPeriod,
             },
         },
         data: {
@@ -53,7 +66,8 @@ export async function POST(request: Request, { params }: { params: { periodId: s
           periodId: Number(params.periodId),
           materialId,
           safetyStock,
-          productId
+          productId,
+          forPeriod,
         },
       });
     }

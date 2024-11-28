@@ -20,6 +20,7 @@ model Material {
   deliveryTime        Float?
   variance            Float?
   Order               Order[]
+  Workplaces          WorkplaceMaterial[]
 }
 
 model MaterialRequirement {
@@ -37,6 +38,8 @@ model Period {
   Warehouse      Warehouse[]
   Forecast       Forecast[]
   ProductionPlan ProductionPlanDecision[]
+  WorkplaceMaterial WorkplaceMaterial[]
+  Workplace      Workplace[]
 }
 
 model Warehouse {
@@ -46,6 +49,31 @@ model Warehouse {
   amount     Int
   periodId   Int
   materialId String
+}
+
+model Workplace {
+  id       Int                @id @default(autoincrement())
+  name     String
+  capacity Int                // Total capacity of the workplace
+  overtime Int?
+  numberOfShifts  Int
+  periodId Int
+  Period       Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  Materials WorkplaceMaterial[]  @relation // Materials processed at this workplace
+}
+
+model WorkplaceMaterial {
+  workplaceId  Int
+  materialId   String
+  periodId     Int
+  capacityRequired Int    // Capacity required to process this material at this workplace
+  processingTime Float    // in minutes
+  setupTime      Float    // in minutes
+  procurementTime Float   // in minutes
+  Workplace    Workplace @relation(fields: [workplaceId], references: [id])
+  Material     Material  @relation(fields: [materialId], references: [id])
+  Period       Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  @@id([workplaceId, materialId, periodId])
 }
 
 model Forecast {

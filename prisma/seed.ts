@@ -250,6 +250,14 @@ async function main() {
     await prisma.setting.createMany({
         data: settings,
     })
+
+    // const workplaceMaterials: WorkplaceMaterial[] = [
+
+    // ]
+
+    // await prisma.workplaceMaterial.createMany({
+    //     data: workplaceMaterials,
+    // })
 }
 main()
   .then(async () => {

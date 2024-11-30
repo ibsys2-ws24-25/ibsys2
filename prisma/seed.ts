@@ -265,13 +265,119 @@ async function main() {
         data: settings,
     })
 
-    // const workplaceMaterials: WorkplaceMaterial[] = [
+    const workplaceMaterials = [
 
-    // ]
+        {workplaceId: 1, materialId: "E49", procurementTime: 6.0},
+        {workplaceId: 1, materialId: "E54", procurementTime: 6.0},
+        {workplaceId: 1, materialId: "E29", procurementTime: 6.0},
+        
+        {workplaceId: 2, materialId: "E50", procurementTime: 5.0},
+        {workplaceId: 2, materialId: "E55", procurementTime: 5.0},
+        {workplaceId: 2, materialId: "E30", procurementTime: 5.0},
+        
+        {workplaceId: 3, materialId: "E51", procurementTime: 5.0},
+        {workplaceId: 3, materialId: "E56", procurementTime: 5.0},
+        {workplaceId: 3, materialId: "E31", procurementTime: 6.0},
+        
+        {workplaceId: 4, materialId: "P1", procurementTime: 6.0},
+        {workplaceId: 4, materialId: "P2", procurementTime: 7.0},
+        {workplaceId: 4, materialId: "P3", procurementTime: 7.0},
+        
+        {workplaceId: 6, materialId: "E16", procurementTime: 4.0},
+        {workplaceId: 6, materialId: "E18", procurementTime: 4.0},
+        {workplaceId: 6, materialId: "E19", procurementTime: 4.0},
+        {workplaceId: 6, materialId: "E20", procurementTime: 4.0},
 
-    // await prisma.workplaceMaterial.createMany({
-    //     data: workplaceMaterials,
-    // })
+        {workplaceId: 7, materialId: "E10", procurementTime: 2.0},
+        {workplaceId: 7, materialId: "E11", procurementTime: 2.0},
+        {workplaceId: 7, materialId: "E12", procurementTime: 2.0},
+        {workplaceId: 7, materialId: "E13", procurementTime: 2.0},
+        {workplaceId: 7, materialId: "E14", procurementTime: 2.0},
+        {workplaceId: 7, materialId: "E15", procurementTime: 2.0},
+        {workplaceId: 7, materialId: "E18", procurementTime: 2.0},
+        {workplaceId: 7, materialId: "E19", procurementTime: 2.0},
+        {workplaceId: 7, materialId: "E20", procurementTime: 2.0},
+        {workplaceId: 7, materialId: "E26", procurementTime: 2.0},
+
+        {workplaceId: 8, materialId: "E10", procurementTime: 1.0},
+        {workplaceId: 8, materialId: "E11", procurementTime: 2.0},
+        {workplaceId: 8, materialId: "E12", procurementTime: 2.0},
+        {workplaceId: 8, materialId: "E13", procurementTime: 1.0},
+        {workplaceId: 8, materialId: "E14", procurementTime: 2.0},
+        {workplaceId: 8, materialId: "E15", procurementTime: 2.0},
+        {workplaceId: 8, materialId: "E18", procurementTime: 3.0},
+        {workplaceId: 8, materialId: "E19", procurementTime: 3.0},
+        {workplaceId: 8, materialId: "E20", procurementTime: 3.0},
+
+        {workplaceId: 9, materialId: "E10", procurementTime: 3.0},
+        {workplaceId: 9, materialId: "E11", procurementTime: 3.0},
+        {workplaceId: 9, materialId: "E12", procurementTime: 3.0},
+        {workplaceId: 9, materialId: "E13", procurementTime: 3.0},
+        {workplaceId: 9, materialId: "E14", procurementTime: 3.0},
+        {workplaceId: 9, materialId: "E15", procurementTime: 3.0},
+        {workplaceId: 9, materialId: "E18", procurementTime: 2.0},
+        {workplaceId: 9, materialId: "E19", procurementTime: 2.0},
+        {workplaceId: 9, materialId: "E20", procurementTime: 2.0},
+
+        {workplaceId: 10, materialId: "E4", procurementTime: 4.0},
+        {workplaceId: 10, materialId: "E5", procurementTime: 4.0},
+        {workplaceId: 10, materialId: "E6", procurementTime: 4.0},
+        {workplaceId: 10, materialId: "E7", procurementTime: 4.0},
+        {workplaceId: 10, materialId: "E8", procurementTime: 4.0},
+        {workplaceId: 10, materialId: "E9", procurementTime: 4.0},
+
+        {workplaceId: 11, materialId: "E4", procurementTime: 3.0},
+        {workplaceId: 11, materialId: "E5", procurementTime: 3.0},
+        {workplaceId: 11, materialId: "E6", procurementTime: 3.0},
+        {workplaceId: 11, materialId: "E7", procurementTime: 3.0},
+        {workplaceId: 11, materialId: "E8", procurementTime: 3.0},
+        {workplaceId: 11, materialId: "E9", procurementTime: 3.0},
+
+        {workplaceId: 12, materialId: "E10", procurementTime: 3.0},
+        {workplaceId: 12, materialId: "E11", procurementTime: 3.0},
+        {workplaceId: 12, materialId: "E12", procurementTime: 3.0},
+        {workplaceId: 12, materialId: "E13", procurementTime: 3.0},
+        {workplaceId: 12, materialId: "E14", procurementTime: 3.0},
+        {workplaceId: 12, materialId: "E15", procurementTime: 3.0},
+
+        {workplaceId: 13, materialId: "E10", procurementTime: 2.0},
+        {workplaceId: 13, materialId: "E11", procurementTime: 2.0},
+        {workplaceId: 13, materialId: "E12", procurementTime: 2.0},
+        {workplaceId: 13, materialId: "E13", procurementTime: 2.0},
+        {workplaceId: 13, materialId: "E14", procurementTime: 2.0},
+        {workplaceId: 13, materialId: "E15", procurementTime: 2.0},
+
+        {workplaceId: 14, materialId: "E16", procurementTime: 3.0},
+
+        {workplaceId: 15, materialId: "E17", procurementTime: 3.0},
+        {workplaceId: 15, materialId: "E26", procurementTime: 3.0},
+
+    ]
+
+    await prisma.workplaceMaterial.createMany({
+        data: workplaceMaterials,
+    })
+
+    const workplaces = [
+        {name: 1, setupTime: 60, capacity: 2400},
+        {name: 2, setupTime: 80, capacity: 2400},
+        {name: 3, setupTime: 60, capacity: 2400},
+        {name: 4, setupTime: 80, capacity: 2400},
+        {name: 6, setupTime: 60, capacity: 2400},
+        {name: 7, setupTime: 840, capacity: 2400},
+        {name: 8, setupTime: 465, capacity: 2400},
+        {name: 9, setupTime: 420, capacity: 2400},
+        {name: 10, setupTime: 240, capacity: 2400},
+        {name: 11, setupTime: 100, capacity: 2400},
+        {name: 12, setupTime: 0, capacity: 2400},
+        {name: 13, setupTime: 0, capacity: 2400},
+        {name: 14, setupTime: 0, capacity: 2400},
+        {name: 15, setupTime: 30, capacity: 2400},
+    ]
+
+    await prisma.workplace.createMany({
+        data: workplaces,
+    })
 }
 main()
   .then(async () => {

@@ -15,7 +15,7 @@ export default function ProductionPlanNavigation() {
                     <PaginationPrevious href="#" />
                 </PaginationItem>
                 <PaginationItem className="w-full">
-                    <PaginationLink className="w-full border" href={`/periods/${periodId}/planning/production`}>Production</PaginationLink>
+                    <PaginationLink className="w-full border" href={`/periods/${periodId}/planning/forecast`}>Production</PaginationLink>
                 </PaginationItem>
                 <PaginationItem className="w-full">
                     <PaginationLink className="w-full border" href={`/periods/${periodId}/planning/production/1`}>Material P1</PaginationLink>

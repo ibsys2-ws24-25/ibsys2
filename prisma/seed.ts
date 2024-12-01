@@ -262,20 +262,20 @@ async function main() {
     }
 
     const workplaces = [
-        {name: 1, setupTime: 60, capacity: 2400},
-        {name: 2, setupTime: 80, capacity: 2400},
-        {name: 3, setupTime: 60, capacity: 2400},
-        {name: 4, setupTime: 80, capacity: 2400},
-        {name: 6, setupTime: 60, capacity: 2400},
-        {name: 7, setupTime: 840, capacity: 2400},
-        {name: 8, setupTime: 465, capacity: 2400},
-        {name: 9, setupTime: 420, capacity: 2400},
-        {name: 10, setupTime: 240, capacity: 2400},
-        {name: 11, setupTime: 100, capacity: 2400},
-        {name: 12, setupTime: 0, capacity: 2400},
-        {name: 13, setupTime: 0, capacity: 2400},
-        {name: 14, setupTime: 0, capacity: 2400},
-        {name: 15, setupTime: 30, capacity: 2400},
+        {name: 1, setupTime: 60},
+        {name: 2, setupTime: 80},
+        {name: 3, setupTime: 60},
+        {name: 4, setupTime: 80},
+        {name: 6, setupTime: 60},
+        {name: 7, setupTime: 840},
+        {name: 8, setupTime: 465},
+        {name: 9, setupTime: 420},
+        {name: 10, setupTime: 240},
+        {name: 11, setupTime: 100},
+        {name: 12, setupTime: 0},
+        {name: 13, setupTime: 0},
+        {name: 14, setupTime: 0},
+        {name: 15, setupTime: 30},
     ]
 
     await prisma.workplace.createMany({

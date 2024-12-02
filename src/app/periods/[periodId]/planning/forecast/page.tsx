@@ -1,4 +1,4 @@
-import ForecastForm from "@/components/pages/forecast/patchedForecast/ForecastForm";
+import ForecastPageComponent from "@/components/pages/forecast/patchedForecast/ForecastPageComponent";
 import { Forecast, PrismaClient } from "@prisma/client";
 import { notFound } from "next/navigation";
 
@@ -22,11 +22,9 @@ export default async function ForeCastPage({ params }: { params: { periodId: str
     }
 
     return (
-        <div>
-            <ForecastForm
-                periodId={ parseInt(params.periodId) }
-                forecasts={ period.Forecast }
-            />
-        </div>
+        <ForecastPageComponent 
+            periodId={ parseInt(params.periodId) }
+            forecasts={ period.Forecast }
+        />
     );
 }

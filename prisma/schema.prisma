@@ -50,25 +50,30 @@ model Warehouse {
   materialId String
 }
 
-model Workplace {
-  id       Int                @id @default(autoincrement())
-  name     Int                @unique
-  capacity Int                @default(2400)
-  overtime Int?
-  numberOfShifts  Int?
-  setupTime      Float
-  periodId Int?
-  Period       Period?   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+model WorkplaceHelper {
+  id       String                @id @unique
+  maxCapacityPerShift Int                @default(2400)
+  setupTime      Float 
   Materials WorkplaceMaterial[]  @relation // Materials processed at this workplace
 }
 
+model Workplace {
+  id       Int                @id @default(autoincrement())
+  name     String                
+  capacity Int
+  overtime Int?
+  numberOfShifts  Int       @default(1)
+  periodId Int
+  Period       Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+}
+
 model WorkplaceMaterial {
-  workplaceId  Int
+  workplaceId  String
   materialId   String
   capacityRequired Int?    // Capacity required to process this material at this workplace
   processingTime Float?    // in minutes
   procurementTime Float   // in minutes
-  Workplace    Workplace @relation(fields: [workplaceId], references: [name])
+  Workplace    WorkplaceHelper @relation(fields: [workplaceId], references: [id])
   Material     Material  @relation(fields: [materialId], references: [id])
   @@id([workplaceId, materialId])
 }

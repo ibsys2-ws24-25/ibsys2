@@ -73,12 +73,14 @@ model ProductionPlanDecision {
 
 model Order {
   id          Int      @id @default(autoincrement())
-  orderId     Int
+  orderId     Int? 
   orderPeriod Int
   mode        Int
   Material    Material @relation(fields: [materialId], references: [id])
   amount      Int 
   materialId  String
+
+  @@unique([orderPeriod, materialId])
 }
 
 model Setting {

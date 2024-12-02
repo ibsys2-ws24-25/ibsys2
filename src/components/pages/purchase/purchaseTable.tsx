@@ -1,9 +1,11 @@
 "use client"
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "@/components/ui/table";
 import { PurchaseParts } from "@/lib/prodUtils";
 import { Order } from "@prisma/client";
+import { useState } from "react";
 
 export interface PurchaseTableProps {
     purchaseParts: PurchaseParts[];
@@ -12,6 +14,40 @@ export interface PurchaseTableProps {
 }
 
 const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) => {
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [inputValues, setInputValues] = useState<{ [key: string]: number }>({});
+
+  const handleInputChange = (materialId: string, value: number) => {
+    setInputValues((prev) => ({
+      ...prev,
+      [materialId]: value,
+    }));
+  };
+
+  const saveAllValues = async () => {
+    setIsUpdating(true);
+    try {
+      const response = await fetch(`/api/period/${periodId}/order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(inputValues),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save values.");
+      }
+
+      alert("Values saved successfully!");
+    } catch (error) {
+      console.error("Error saving values:", error);
+      alert("Error saving values. Please try again.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="">
       <Table className="border-collapse">
@@ -117,24 +153,38 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                       <Input
                         type="number"
                         min={0}
-                        step={1}
+                        step={100}
+                        disabled={ isUpdating }
+                        value={inputValues[material.materialId] || ""}
+                        onChange={(e) =>
+                          handleInputChange(material.materialId, parseInt(e.target.value, 10) || 0)
+                        }
                         className="text-center w-3/4"/>
                       <span className="flex-1 text-center w 1/4 p-3">ToDO</span>
                     </div>
                   </TableCell>
                   <TableCell>
-                  <div className="flex">
-                    <span className="flex-1 text-center">ToDO</span>
-                    <span className="flex-1 text-center">ToDO</span>
-                    <span className="flex-1 text-center">ToDO</span>
-                    <span className="flex-1 text-center">ToDO</span>
-                  </div>
+                    <div className="flex">
+                      <span className="flex-1 text-center">ToDO</span>
+                      <span className="flex-1 text-center">ToDO</span>
+                      <span className="flex-1 text-center">ToDO</span>
+                      <span className="flex-1 text-center">ToDO</span>
+                    </div>
                   </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
+      <div className="flex w-full justify-center mt-3">
+        <Button
+          onClick={saveAllValues}
+          disabled={isUpdating}
+          className="w-1/4"
+        >
+          {isUpdating ? "Saving..." : "Save All"}
+        </Button>
+      </div>
     </div>
   );
 }

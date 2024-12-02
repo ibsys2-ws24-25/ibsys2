@@ -72,21 +72,21 @@ export async function POST(request: Request) {
                 
                 if (forecast.$) {
                     forecastEntities.push({
-                        forPeriod: (Number(id) + 1),
+                        forPeriod: Number(id),
                         periodId: Number(id),
                         materialId: "P1",
                         amount: Number(forecast.$.p1),
                     });
 
                     forecastEntities.push({
-                        forPeriod: (Number(id) + 1),
+                        forPeriod: Number(id),
                         periodId: Number(id),
                         materialId: "P2",
                         amount: Number(forecast.$.p2),
                     });
 
                     forecastEntities.push({
-                        forPeriod: (Number(id) + 1),
+                        forPeriod: Number(id),
                         periodId: Number(id),
                         materialId: "P3",
                         amount: Number(forecast.$.p3),

@@ -7,8 +7,10 @@ import ProductSafetyStock from "@/components/pages/forecast/patchedForecast/Prod
 export default function ForecastPage({ periodId, forecasts, prodDecisions }: ForecastProps) {
     return(
         <ForecastProvider initialForecasts={forecasts} initialProdDecisions={ prodDecisions }>
+            <h1 className="font-light text-2xl">Set Forecast values for Period { periodId }</h1>
             <ForecastForm periodId={periodId} />
             <hr className="mt-4 mb-4" />
+            <h1 className="font-light text-2xl">Decide which safety Stock you want after Period { periodId }</h1>
             <ProductSafetyStock periodId={periodId} />
         </ForecastProvider>
     );

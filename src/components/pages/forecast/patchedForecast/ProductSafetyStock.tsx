@@ -3,10 +3,10 @@
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useForecastContext } from '@/context/ForecastContext';
-import { getDecisionObjectByProductAndPeriod } from '@/lib/forecastUtils';
+import { getDecisionObjectByProductAndPeriod, getForecastObjectByProductAndPeriod } from '@/lib/forecastUtils';
 
 export default function ProductSafetyStock({ periodId }: { periodId: number }) {
-    const { localProdDecisions, isUpdating, updateLocalDecision } = useForecastContext();
+    const { localProdDecisions, localForecasts, isUpdating, updateLocalDecision, updateApiDecision } = useForecastContext();
 
     return (
         <Table>
@@ -35,7 +35,7 @@ export default function ProductSafetyStock({ periodId }: { periodId: number }) {
                                         disabled={isUpdating}
                                         value={getDecisionObjectByProductAndPeriod(localProdDecisions, productId, period)?.safetyStock || 0}
                                         onChange={(e) => updateLocalDecision(period, productId, parseInt(e.target.value))}
-                                        // onBlur={() => updateApiForecast(periodId, period, productId)}
+                                        onBlur={() => updateApiDecision(periodId, periodId, productId)}
                                     />
                                 </TableCell>
                             );
@@ -45,16 +45,24 @@ export default function ProductSafetyStock({ periodId }: { periodId: number }) {
             </TableBody>
             <TableFooter>
                 <TableRow>
-                    <TableCell className="font-bold">Total in Period</TableCell>
+                    <TableCell className="font-bold">Combined</TableCell>
                     {[0, 1, 2, 3].map((offset) => {
                         const period = periodId + offset;
-                        const total = ['P1', 'P2', 'P3'].reduce(
+
+                        const totalSales = ['P1', 'P2', 'P3'].reduce(
+                            (sum, productId) => sum + (getForecastObjectByProductAndPeriod(localForecasts, productId, period)?.amount || 0),
+                            0
+                        );
+                        const totalSafety = ['P1', 'P2', 'P3'].reduce(
                             (sum, productId) => sum + (getDecisionObjectByProductAndPeriod(localProdDecisions, productId, period)?.safetyStock || 0),
                             0
                         );
+
+                        const combinedTotal = totalSales + totalSafety;
+
                         return (
                             <TableCell key={period} className="font-bold">
-                                {total}
+                                {combinedTotal}
                             </TableCell>
                         );
                     })}

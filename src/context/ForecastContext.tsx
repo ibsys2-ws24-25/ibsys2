@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Forecast, ProductionPlanDecision } from '@prisma/client';
-import { getForecastObjectByProductAndPeriod } from '@/lib/forecastUtils';
+import { getDecisionObjectByProductAndPeriod, getForecastObjectByProductAndPeriod } from '@/lib/forecastUtils';
 
 // Typen für den Context
 interface ForecastContextType {
@@ -12,6 +12,7 @@ interface ForecastContextType {
     updateLocalForecast: (periodId: number, productId: string, value: number) => void;
     updateLocalDecision: (periodId: number, materialId: string, value: number) => void;
     updateApiForecast: (periodId: number, forPeriodId: number, productId: string) => Promise<void>;
+    updateApiDecision: (periodId: number, forPeriodId: number, materialId: string) => Promise<void>;
     setForecasts: (forecasts: Forecast[]) => void;
 }
 
@@ -127,6 +128,47 @@ export const ForecastProvider = ({
         }
     };
 
+    const updateApiDecision = async (
+        periodId: number,
+        forPeriodId: number,
+        materialId: string,
+    ) => {
+        setIsUpdating(true);
+        const safetyStock = getDecisionObjectByProductAndPeriod(localProdDecisions, materialId, forPeriodId)?.safetyStock;
+    
+        if (safetyStock && safetyStock > 0) {
+            try {
+                const response = await fetch(`/api/period/${periodId}/production`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        materialId,
+                        productId: materialId,
+                        safetyStock,
+                        forPeriod: forPeriodId,
+                    }),
+                });
+    
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Failed to update decision:', errorData.error || response.statusText);
+                } else {
+                    const updatedDecision = await response.json();
+                    console.log('Decision updated successfully:', updatedDecision);
+                }
+            } catch (error) {
+                console.error('Error while sending the request to update decision:', error);
+            } finally {
+                setIsUpdating(false);
+            }
+        } else {
+            console.warn('Invalid data: safetyStock must be greater than 0');
+            setIsUpdating(false);
+        }
+    };
+
     return (
         <ForecastContext.Provider
             value={{
@@ -136,6 +178,7 @@ export const ForecastProvider = ({
                 updateLocalForecast,
                 updateLocalDecision,
                 updateApiForecast,
+                updateApiDecision,
                 setForecasts: setLocalForecasts,
             }}
         >

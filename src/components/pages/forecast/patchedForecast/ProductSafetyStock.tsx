@@ -5,7 +5,7 @@ import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, Tabl
 import { useForecastContext } from '@/context/ForecastContext';
 import { getDecisionObjectByProductAndPeriod } from '@/lib/forecastUtils';
 
-export default function ProductionOrder({ periodId }: { periodId: number }) {
+export default function ProductSafetyStock({ periodId }: { periodId: number }) {
     const { localProdDecisions, isUpdating, updateLocalDecision } = useForecastContext();
 
     return (

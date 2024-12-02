@@ -48,41 +48,43 @@ export default function PeriodCardGrid({ periods }: PeriodTableProps) {
                             <CardDescription>{String(period.created)}</CardDescription>
                         </CardHeader>
                         <CardContent className="p-4">
-                            <Button variant="default" className="w-full">
-                                <Link href={`/periods/${period.id}`}>
+                            <Link href={`/periods/${period.id}`}>
+                                <Button variant="default" className="w-full">
                                     View Period
-                                </Link>
-                            </Button>
-                            <Button variant="outline" className="w-full mt-2">
-                                <Link href={`/periods/${period.id}/planning/forecast`}>
+                                
+                                </Button>
+                            </Link>
+                            <Link href={`/periods/${period.id}/planning/forecast`}>
+                                <Button variant="outline" className="w-full mt-2">
+                                
                                     Forecasts
-                                </Link>
-                            </Button>
-                            <Button variant="outline" className="w-full mt-2">
-                                <Link href={`/periods/${period.id}/planning/production/1`}>
+                                </Button>
+                            </Link>
+                            <Link href={`/periods/${period.id}/planning/production/1`}>
+                                <Button variant="outline" className="w-full mt-2">
                                     Plan Production P1
-                                </Link>
-                            </Button>
-                            <Button variant="outline" className="w-full mt-1">
-                                <Link href={`/periods/${period.id}/planning/production/2`}>
+                                </Button>
+                            </Link>
+                            <Link href={`/periods/${period.id}/planning/production/2`}>
+                                <Button variant="outline" className="w-full mt-1">
                                     Plan Production P2
-                                </Link>
-                            </Button>
+                                </Button>
+                            </Link>
                             <Button variant="outline" className="w-full mt-1">
                                 <Link href={`/periods/${period.id}/planning/production/3`}>
                                     Plan Production P3
                                 </Link>
                             </Button>
-                            <Button variant="outline" className="w-full mt-2">
-                                <Link href={`/periods/${period.id}/planning/worktime`}>
+                            <Link href={`/periods/${period.id}/planning/worktime`}>
+                                <Button variant="outline" className="w-full mt-2">
                                     Plan Worktime
-                                </Link>
-                            </Button>
-                            <Button variant="outline" className="w-full mt-1">
-                                <Link href={`/periods/${period.id}/planning/purchase`}>
+                                </Button>
+                            </Link>
+                            <Link href={`/periods/${period.id}/planning/purchase`}>
+                                <Button variant="outline" className="w-full mt-1">
                                     Purchase Parts
-                                </Link>
-                            </Button>
+                                </Button>
+                            </Link>
                             <Button
                                 variant="destructive"
                                 className="w-full mt-4"

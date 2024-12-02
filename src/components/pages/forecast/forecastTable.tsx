@@ -8,6 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Input } from '@/components/ui/input';
 
 interface DataWithAmounts {
   product: string;
@@ -52,7 +53,7 @@ export function ForecastTable({ currentPeriod, data, updateData }: ForecastTable
               periodOffset === 0 ?
                 <TableCell key={periodOffset}>{amount}</TableCell> :
                 <TableCell key={periodOffset}>
-                  <input
+                  <Input
                     type="number"
                     value={amount}
                     onChange={(e) => handleInputChange(index, periodOffset, e.target.value)}

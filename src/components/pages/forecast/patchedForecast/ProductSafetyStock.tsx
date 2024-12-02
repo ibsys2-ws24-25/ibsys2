@@ -35,7 +35,7 @@ export default function ProductSafetyStock({ periodId }: { periodId: number }) {
                                         disabled={isUpdating}
                                         value={getDecisionObjectByProductAndPeriod(localProdDecisions, productId, period)?.safetyStock || 0}
                                         onChange={(e) => updateLocalDecision(period, productId, parseInt(e.target.value))}
-                                        onBlur={() => updateApiDecision(periodId, periodId, productId)}
+                                        onBlur={() => updateApiDecision(periodId, period, productId)}
                                     />
                                 </TableCell>
                             );

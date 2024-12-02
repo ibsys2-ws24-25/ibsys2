@@ -1,14 +1,16 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Forecast } from '@prisma/client';
+import { Forecast, ProductionPlanDecision } from '@prisma/client';
 import { getForecastObjectByProductAndPeriod } from '@/lib/forecastUtils';
 
 // Typen für den Context
 interface ForecastContextType {
     localForecasts: Forecast[];
+    localProdDecisions: ProductionPlanDecision[];
     isUpdating: boolean;
     updateLocalForecast: (periodId: number, productId: string, value: number) => void;
+    updateLocalDecision: (periodId: number, materialId: string, value: number) => void;
     updateApiForecast: (periodId: number, forPeriodId: number, productId: string) => Promise<void>;
     setForecasts: (forecasts: Forecast[]) => void;
 }
@@ -20,11 +22,14 @@ const ForecastContext = createContext<ForecastContextType | undefined>(undefined
 export const ForecastProvider = ({
     children,
     initialForecasts,
+    initialProdDecisions,
 }: {
     children: ReactNode;
     initialForecasts: Forecast[];
+    initialProdDecisions: ProductionPlanDecision[];
 }) => {
     const [localForecasts, setLocalForecasts] = useState<Forecast[]>(initialForecasts);
+    const [localProdDecisions, setLocalProdDecisions] = useState<ProductionPlanDecision[]>(initialProdDecisions);
     const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
     const updateLocalForecast = (periodId: number, productId: string, value: number) => {
@@ -49,6 +54,39 @@ export const ForecastProvider = ({
                 };
 
                 return [...prevForecasts, newForecast];
+            }
+        });
+    };
+
+    const updateLocalDecision = (periodId: number, materialId: string, value: number) => {
+        setLocalProdDecisions((prevDecisions) => {
+            const decisionExists = prevDecisions.some(
+                (decision) =>
+                    decision.periodId === periodId &&
+                    decision.productId === materialId &&
+                    decision.materialId === materialId
+            );
+    
+            if (decisionExists) {
+                // Aktualisiere vorhandene Entscheidung
+                return prevDecisions.map((decision) =>
+                    decision.periodId === periodId &&
+                    decision.materialId === materialId &&
+                    decision.materialId === materialId
+                        ? { ...decision, safetyStock: value }
+                        : decision
+                );
+            } else {
+                const newDecision = {
+                    id: Math.max(0, ...prevDecisions.map((d) => d.id)) + 1,
+                    periodId,
+                    materialId,
+                    productId: materialId,
+                    forPeriod: periodId,
+                    safetyStock: value,
+                };
+    
+                return [...prevDecisions, newDecision];
             }
         });
     };
@@ -93,8 +131,10 @@ export const ForecastProvider = ({
         <ForecastContext.Provider
             value={{
                 localForecasts,
+                localProdDecisions,
                 isUpdating,
                 updateLocalForecast,
+                updateLocalDecision,
                 updateApiForecast,
                 setForecasts: setLocalForecasts,
             }}

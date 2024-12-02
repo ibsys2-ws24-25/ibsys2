@@ -56,6 +56,8 @@ model Forecast {
   periodId   Int
   materialId String
   amount     Int
+
+  @@unique([periodId, materialId, forPeriod])
 }
 
 model ProductionPlanDecision {

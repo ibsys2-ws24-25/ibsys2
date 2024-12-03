@@ -262,20 +262,20 @@ async function main() {
     }
 
     const workplaces = [
-        {id: 1, setupTime: 60},
-        {id: 2, setupTime: 80},
-        {id: 3, setupTime: 60},
-        {id: 4, setupTime: 80},
-        {id: 6, setupTime: 60},
-        {id: 7, setupTime: 840},
-        {id: 8, setupTime: 465},
-        {id: 9, setupTime: 420},
-        {id: 10, setupTime: 240},
-        {id: 11, setupTime: 100},
-        {id: 12, setupTime: 0},
-        {id: 13, setupTime: 0},
-        {id: 14, setupTime: 0},
-        {id: 15, setupTime: 30},
+        { id: "1", setupTime: 60.0 },
+        { id: "2", setupTime: 80.0 },
+        { id: "3", setupTime: 60.0 },
+        { id: "4", setupTime: 80.0 },
+        { id: "6", setupTime: 60.0 },
+        { id: "7", setupTime: 840.0 },
+        { id: "8", setupTime: 465.0 },
+        { id: "9", setupTime: 420.0 },
+        { id: "10", setupTime: 240.0 },
+        { id: "11", setupTime: 100.0 },
+        { id: "12", setupTime: 0.0 },
+        { id: "13", setupTime: 0.0 },
+        { id: "14", setupTime: 0.0 },
+        { id: "15", setupTime: 30.0 }
     ]
 
     await prisma.workplaceHelper.createMany({
@@ -283,93 +283,91 @@ async function main() {
     })
 
     const workplaceMaterials = [
-
-        {workplaceId: 1, materialId: "E49", procurementTime: 6.0},
-        {workplaceId: 1, materialId: "E54", procurementTime: 6.0},
-        {workplaceId: 1, materialId: "E29", procurementTime: 6.0},
-        
-        {workplaceId: 2, materialId: "E50", procurementTime: 5.0},
-        {workplaceId: 2, materialId: "E55", procurementTime: 5.0},
-        {workplaceId: 2, materialId: "E30", procurementTime: 5.0},
-        
-        {workplaceId: 3, materialId: "E51", procurementTime: 5.0},
-        {workplaceId: 3, materialId: "E56", procurementTime: 5.0},
-        {workplaceId: 3, materialId: "E31", procurementTime: 6.0},
-        
-        {workplaceId: 4, materialId: "P1", procurementTime: 6.0},
-        {workplaceId: 4, materialId: "P2", procurementTime: 7.0},
-        {workplaceId: 4, materialId: "P3", procurementTime: 7.0},
-        
-        {workplaceId: 6, materialId: "E16", procurementTime: 4.0},
-        {workplaceId: 6, materialId: "E18", procurementTime: 4.0},
-        {workplaceId: 6, materialId: "E19", procurementTime: 4.0},
-        {workplaceId: 6, materialId: "E20", procurementTime: 4.0},
-
-        {workplaceId: 7, materialId: "E10", procurementTime: 2.0},
-        {workplaceId: 7, materialId: "E11", procurementTime: 2.0},
-        {workplaceId: 7, materialId: "E12", procurementTime: 2.0},
-        {workplaceId: 7, materialId: "E13", procurementTime: 2.0},
-        {workplaceId: 7, materialId: "E14", procurementTime: 2.0},
-        {workplaceId: 7, materialId: "E15", procurementTime: 2.0},
-        {workplaceId: 7, materialId: "E18", procurementTime: 2.0},
-        {workplaceId: 7, materialId: "E19", procurementTime: 2.0},
-        {workplaceId: 7, materialId: "E20", procurementTime: 2.0},
-        {workplaceId: 7, materialId: "E26", procurementTime: 2.0},
-
-        {workplaceId: 8, materialId: "E10", procurementTime: 1.0},
-        {workplaceId: 8, materialId: "E11", procurementTime: 2.0},
-        {workplaceId: 8, materialId: "E12", procurementTime: 2.0},
-        {workplaceId: 8, materialId: "E13", procurementTime: 1.0},
-        {workplaceId: 8, materialId: "E14", procurementTime: 2.0},
-        {workplaceId: 8, materialId: "E15", procurementTime: 2.0},
-        {workplaceId: 8, materialId: "E18", procurementTime: 3.0},
-        {workplaceId: 8, materialId: "E19", procurementTime: 3.0},
-        {workplaceId: 8, materialId: "E20", procurementTime: 3.0},
-
-        {workplaceId: 9, materialId: "E10", procurementTime: 3.0},
-        {workplaceId: 9, materialId: "E11", procurementTime: 3.0},
-        {workplaceId: 9, materialId: "E12", procurementTime: 3.0},
-        {workplaceId: 9, materialId: "E13", procurementTime: 3.0},
-        {workplaceId: 9, materialId: "E14", procurementTime: 3.0},
-        {workplaceId: 9, materialId: "E15", procurementTime: 3.0},
-        {workplaceId: 9, materialId: "E18", procurementTime: 2.0},
-        {workplaceId: 9, materialId: "E19", procurementTime: 2.0},
-        {workplaceId: 9, materialId: "E20", procurementTime: 2.0},
-
-        {workplaceId: 10, materialId: "E4", procurementTime: 4.0},
-        {workplaceId: 10, materialId: "E5", procurementTime: 4.0},
-        {workplaceId: 10, materialId: "E6", procurementTime: 4.0},
-        {workplaceId: 10, materialId: "E7", procurementTime: 4.0},
-        {workplaceId: 10, materialId: "E8", procurementTime: 4.0},
-        {workplaceId: 10, materialId: "E9", procurementTime: 4.0},
-
-        {workplaceId: 11, materialId: "E4", procurementTime: 3.0},
-        {workplaceId: 11, materialId: "E5", procurementTime: 3.0},
-        {workplaceId: 11, materialId: "E6", procurementTime: 3.0},
-        {workplaceId: 11, materialId: "E7", procurementTime: 3.0},
-        {workplaceId: 11, materialId: "E8", procurementTime: 3.0},
-        {workplaceId: 11, materialId: "E9", procurementTime: 3.0},
-
-        {workplaceId: 12, materialId: "E10", procurementTime: 3.0},
-        {workplaceId: 12, materialId: "E11", procurementTime: 3.0},
-        {workplaceId: 12, materialId: "E12", procurementTime: 3.0},
-        {workplaceId: 12, materialId: "E13", procurementTime: 3.0},
-        {workplaceId: 12, materialId: "E14", procurementTime: 3.0},
-        {workplaceId: 12, materialId: "E15", procurementTime: 3.0},
-
-        {workplaceId: 13, materialId: "E10", procurementTime: 2.0},
-        {workplaceId: 13, materialId: "E11", procurementTime: 2.0},
-        {workplaceId: 13, materialId: "E12", procurementTime: 2.0},
-        {workplaceId: 13, materialId: "E13", procurementTime: 2.0},
-        {workplaceId: 13, materialId: "E14", procurementTime: 2.0},
-        {workplaceId: 13, materialId: "E15", procurementTime: 2.0},
-
-        {workplaceId: 14, materialId: "E16", procurementTime: 3.0},
-
-        {workplaceId: 15, materialId: "E17", procurementTime: 3.0},
-        {workplaceId: 15, materialId: "E26", procurementTime: 3.0},
-
-    ]
+        { workplaceId: "1", materialId: "E49", procurementTime: 6.0 },
+        { workplaceId: "1", materialId: "E54", procurementTime: 6.0 },
+        { workplaceId: "1", materialId: "E29", procurementTime: 6.0 },
+    
+        { workplaceId: "2", materialId: "E50", procurementTime: 5.0 },
+        { workplaceId: "2", materialId: "E55", procurementTime: 5.0 },
+        { workplaceId: "2", materialId: "E30", procurementTime: 5.0 },
+    
+        { workplaceId: "3", materialId: "E51", procurementTime: 5.0 },
+        { workplaceId: "3", materialId: "E56", procurementTime: 5.0 },
+        { workplaceId: "3", materialId: "E31", procurementTime: 6.0 },
+    
+        { workplaceId: "4", materialId: "P1", procurementTime: 6.0 },
+        { workplaceId: "4", materialId: "P2", procurementTime: 7.0 },
+        { workplaceId: "4", materialId: "P3", procurementTime: 7.0 },
+    
+        { workplaceId: "6", materialId: "E16", procurementTime: 4.0 },
+        { workplaceId: "6", materialId: "E18", procurementTime: 4.0 },
+        { workplaceId: "6", materialId: "E19", procurementTime: 4.0 },
+        { workplaceId: "6", materialId: "E20", procurementTime: 4.0 },
+    
+        { workplaceId: "7", materialId: "E10", procurementTime: 2.0 },
+        { workplaceId: "7", materialId: "E11", procurementTime: 2.0 },
+        { workplaceId: "7", materialId: "E12", procurementTime: 2.0 },
+        { workplaceId: "7", materialId: "E13", procurementTime: 2.0 },
+        { workplaceId: "7", materialId: "E14", procurementTime: 2.0 },
+        { workplaceId: "7", materialId: "E15", procurementTime: 2.0 },
+        { workplaceId: "7", materialId: "E18", procurementTime: 2.0 },
+        { workplaceId: "7", materialId: "E19", procurementTime: 2.0 },
+        { workplaceId: "7", materialId: "E20", procurementTime: 2.0 },
+        { workplaceId: "7", materialId: "E26", procurementTime: 2.0 },
+    
+        { workplaceId: "8", materialId: "E10", procurementTime: 1.0 },
+        { workplaceId: "8", materialId: "E11", procurementTime: 2.0 },
+        { workplaceId: "8", materialId: "E12", procurementTime: 2.0 },
+        { workplaceId: "8", materialId: "E13", procurementTime: 1.0 },
+        { workplaceId: "8", materialId: "E14", procurementTime: 2.0 },
+        { workplaceId: "8", materialId: "E15", procurementTime: 2.0 },
+        { workplaceId: "8", materialId: "E18", procurementTime: 3.0 },
+        { workplaceId: "8", materialId: "E19", procurementTime: 3.0 },
+        { workplaceId: "8", materialId: "E20", procurementTime: 3.0 },
+    
+        { workplaceId: "9", materialId: "E10", procurementTime: 3.0 },
+        { workplaceId: "9", materialId: "E11", procurementTime: 3.0 },
+        { workplaceId: "9", materialId: "E12", procurementTime: 3.0 },
+        { workplaceId: "9", materialId: "E13", procurementTime: 3.0 },
+        { workplaceId: "9", materialId: "E14", procurementTime: 3.0 },
+        { workplaceId: "9", materialId: "E15", procurementTime: 3.0 },
+        { workplaceId: "9", materialId: "E18", procurementTime: 2.0 },
+        { workplaceId: "9", materialId: "E19", procurementTime: 2.0 },
+        { workplaceId: "9", materialId: "E20", procurementTime: 2.0 },
+    
+        { workplaceId: "10", materialId: "E4", procurementTime: 4.0 },
+        { workplaceId: "10", materialId: "E5", procurementTime: 4.0 },
+        { workplaceId: "10", materialId: "E6", procurementTime: 4.0 },
+        { workplaceId: "10", materialId: "E7", procurementTime: 4.0 },
+        { workplaceId: "10", materialId: "E8", procurementTime: 4.0 },
+        { workplaceId: "10", materialId: "E9", procurementTime: 4.0 },
+    
+        { workplaceId: "11", materialId: "E4", procurementTime: 3.0 },
+        { workplaceId: "11", materialId: "E5", procurementTime: 3.0 },
+        { workplaceId: "11", materialId: "E6", procurementTime: 3.0 },
+        { workplaceId: "11", materialId: "E7", procurementTime: 3.0 },
+        { workplaceId: "11", materialId: "E8", procurementTime: 3.0 },
+        { workplaceId: "11", materialId: "E9", procurementTime: 3.0 },
+    
+        { workplaceId: "12", materialId: "E10", procurementTime: 3.0 },
+        { workplaceId: "12", materialId: "E11", procurementTime: 3.0 },
+        { workplaceId: "12", materialId: "E12", procurementTime: 3.0 },
+        { workplaceId: "12", materialId: "E13", procurementTime: 3.0 },
+        { workplaceId: "12", materialId: "E14", procurementTime: 3.0 },
+        { workplaceId: "12", materialId: "E15", procurementTime: 3.0 },
+    
+        { workplaceId: "13", materialId: "E10", procurementTime: 2.0 },
+        { workplaceId: "13", materialId: "E11", procurementTime: 2.0 },
+        { workplaceId: "13", materialId: "E12", procurementTime: 2.0 },
+        { workplaceId: "13", materialId: "E13", procurementTime: 2.0 },
+        { workplaceId: "13", materialId: "E14", procurementTime: 2.0 },
+        { workplaceId: "13", materialId: "E15", procurementTime: 2.0 },
+    
+        { workplaceId: "14", materialId: "E16", procurementTime: 3.0 },
+    
+        { workplaceId: "15", materialId: "E17", procurementTime: 3.0 },
+        { workplaceId: "15", materialId: "E26", procurementTime: 3.0 }
+    ]    
 
     await prisma.workplaceMaterial.createMany({
         data: workplaceMaterials,

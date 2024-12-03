@@ -3,60 +3,124 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
+function calculateOvertimeAndShifts(capacity: number) {
+    const overtime = capacity > 2400 ? Math.floor((capacity - 2400) / 5) : 0;
+    const numberOfShifts = capacity >= 3600 ? 2 : 1;
+    return { overtime, numberOfShifts };
+}
+
+async function updateExistingWorkplaces(periodId: number, workplaceCapacityMap: Record<string, number>) {
+    try {
+        const existingWorkplaces = await prisma.workplace.findMany({
+            where: { periodId: periodId },
+        });
+
+        await Promise.all(
+            existingWorkplaces.map(async (workplace) => {
+                const calculatedCapacity = workplaceCapacityMap[workplace.id] || 0;
+                const { overtime, numberOfShifts } = calculateOvertimeAndShifts(calculatedCapacity);
+
+                // Update the workplace with the calculated values
+                await prisma.workplace.update({
+                    where: { id: workplace.id },
+                    data: {
+                        capacity: calculatedCapacity,
+                        overtime: overtime,
+                        numberOfShifts: numberOfShifts,
+                    },
+                });
+            })
+        );
+    } catch (error) {
+        console.error('Error updating workplaces for the period:', error);
+        throw new Error('Failed to update workplaces for the period.');
+    }
+}
+
+async function createWorkplaces(periodId: number, workplaceCapacityMap: Record<string, number>) {
+    try {
+        const workplaceHelpers = await prisma.workplaceHelper.findMany();
+
+        await Promise.all(
+            workplaceHelpers.map(async (helper) => {
+                const calculatedCapacity = workplaceCapacityMap[helper.id] || 0;
+                const { overtime, numberOfShifts } = calculateOvertimeAndShifts(calculatedCapacity);
+                await prisma.workplace.create({
+                    data: {
+                        name: helper.id,
+                        capacity: calculatedCapacity,
+                        overtime: overtime,
+                        numberOfShifts: numberOfShifts,
+                        periodId: periodId,
+                    },
+                });
+            })
+        );
+    } catch (error) {
+        console.error('Error creating workplaces:', error);
+        throw new Error('Failed to create new workplaces.');
+    }
+}
+
+
 export async function calculateTotalCapacity(request: Request, { params }: { params: { periodId: string } }) {
     const periodId = Number(params.periodId);
 
     try {
-        // Fetch the production plan for the given period
-        const response = await fetch(`/api/period/${periodId}/manufactoring-plan/`, {
-            method: "GET",
+        const response = await fetch(`/api/period/${periodId}/manufactoring-plan/`, { method: "GET" });
+        if (!response.ok) throw new Error("Failed to fetch production plan.");
+
+        const productionPlan: Record<string, number> = await response.json();
+        if (!productionPlan || Object.keys(productionPlan).length === 0) throw new Error("Production plan is empty or invalid.");
+
+        const workplaceCapacityMap: Record<string, number> = {};
+        const materialIds = Object.keys(productionPlan);
+
+        const materials = await prisma.material.findMany({
+            where: { id: { in: materialIds } },
+            include: { Workplaces: true },
         });
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch production plan.");
-        }
+        const workplaceHelpers = await prisma.workplaceHelper.findMany();
+        const workplaceHelperMap = Object.fromEntries(workplaceHelpers.map((helper) => [helper.id, helper]));
 
-        const productionPlan: Record<string, number> = await response.json(); // Example: { "P1": 100, "E10": 200 }
-
-        // Initialize a map to track total capacity for each workplace
-        const workplaceCapacityMap: Record<string, number> = {}; // { workplaceId: totalCapacity }
-
-        // Process each material in the production plan
-        for (const [materialId, productionQuantity] of Object.entries(productionPlan)) {
-            // Fetch material details with procurement time and linked workplaces
-            const material = await prisma.material.findUnique({
-                where: { id: materialId },
-                include: {
-                    Workplaces: true, // Include all workplaces linked to this material
-                },
-            });
-
-            if (!material) {
-                console.warn(`Material with ID ${materialId} not found.`);
-                continue;
-            }
+        for (const material of materials) {
+            const productionQuantity = productionPlan[material.id];
 
             for (const workplaceMaterial of material.Workplaces) {
-                const { workplaceId, procurementTime, setupTime } = workplaceMaterial;
+                const { workplaceId, procurementTime } = workplaceMaterial;
+                const workplaceHelper = workplaceHelperMap[workplaceId];
 
-                if (!procurementTime) {
-                    console.warn(`No procurement time found for material ${materialId} at workplace ${workplaceId}.`);
+                if (!procurementTime || !workplaceHelper) {
+                    console.warn(`Missing data for material ${material.id} and workplace ${workplaceId}.`);
                     continue;
                 }
 
-                // Calculate total capacity for the workplace
-                const materialCapacity = productionQuantity * procurementTime + (setupTime || 0);
-
-                // Add this material's capacity to the total for the workplace
+                const materialCapacity = productionQuantity * procurementTime + workplaceHelper.setupTime;
                 workplaceCapacityMap[workplaceId] = (workplaceCapacityMap[workplaceId] || 0) + materialCapacity;
             }
         }
 
-        // Return the total capacity map as a JSON response
+        const existingPeriod = await prisma.period.findUnique({
+            where: { id: periodId },
+            include: { Workplace: true },
+        });
+
+        if (existingPeriod) {
+            await updateExistingWorkplaces(periodId, workplaceCapacityMap);
+        } else {
+            await createWorkplaces(periodId, workplaceCapacityMap);
+        }
+
         return NextResponse.json(workplaceCapacityMap);
-    } catch (error) {
-        console.error("Error calculating total capacity:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("Error calculating total capacity:", error.message);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        } else {
+            console.error("Unknown error calculating total capacity:", error);
+            return NextResponse.json({ error: "An unknown error occurred." }, { status: 500 });
+        }
     } finally {
         await prisma.$disconnect();
     }

@@ -5,9 +5,9 @@ import { ForecastProvider } from "@/context/ForecastContext";
 import ProductSafetyStock from "@/components/pages/forecast/patchedForecast/ProductSafetyStock";
 import ProductionRequirement from "@/components/pages/forecast/patchedForecast/ProductionRequirement";
 
-export default function ForecastPage({ periodId, forecasts, prodDecisions, warehouse }: ForecastProps) {
+export default function ForecastPage({ periodId, forecasts, prodDecisions, warehouse, additionalSales }: ForecastProps) {
     return(
-        <ForecastProvider initialForecasts={forecasts} initialProdDecisions={ prodDecisions }>
+        <ForecastProvider initialForecasts={forecasts} initialProdDecisions={ prodDecisions } initialAdditionalSales={ additionalSales }>
             <h1 className="font-light text-2xl">Set Forecast values for Period { periodId }</h1>
             <ForecastForm periodId={periodId} />
             <hr className="mt-4 mb-4" />

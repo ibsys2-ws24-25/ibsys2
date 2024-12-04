@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Forecast, ProductionPlanDecision } from '@prisma/client';
-import { getDecisionObjectByProductAndPeriod, getForecastObjectByProductAndPeriod } from '@/lib/forecastUtils';
+import { AdditionalSale, Forecast, ProductionPlanDecision } from '@prisma/client';
+import { getAdditionalSaleObjectByProductAndPeriod, getDecisionObjectByProductAndPeriod, getForecastObjectByProductAndPeriod } from '@/lib/forecastUtils';
 
 // Typen für den Context
 interface ForecastContextType {
@@ -11,6 +11,8 @@ interface ForecastContextType {
     isUpdating: boolean;
     updateLocalForecast: (periodId: number, productId: string, value: number) => void;
     updateLocalDecision: (periodId: number, materialId: string, value: number) => void;
+    updateLocalAdditionalSales: (periodId: number, materialId: string, value: number) => void;
+    updateApiAdditionalSale: (periodId: number, forPeriodId: number, productId: string) => void;
     updateApiForecast: (periodId: number, forPeriodId: number, productId: string) => Promise<void>;
     updateApiDecision: (periodId: number, forPeriodId: number, materialId: string) => Promise<void>;
     setForecasts: (forecasts: Forecast[]) => void;
@@ -24,14 +26,45 @@ export const ForecastProvider = ({
     children,
     initialForecasts,
     initialProdDecisions,
+    initialAdditionalSales
 }: {
     children: ReactNode;
     initialForecasts: Forecast[];
     initialProdDecisions: ProductionPlanDecision[];
+    initialAdditionalSales: AdditionalSale[];
 }) => {
     const [localForecasts, setLocalForecasts] = useState<Forecast[]>(initialForecasts);
     const [localProdDecisions, setLocalProdDecisions] = useState<ProductionPlanDecision[]>(initialProdDecisions);
+    const [localAdditionalSales, setLocalAdditionalSales] = useState<AdditionalSale[]>(initialAdditionalSales);
     const [isUpdating, setIsUpdating] = useState<boolean>(false);
+
+    const updateLocalAdditionalSales = (periodId: number, materialId: string, value: number) => {
+        setLocalAdditionalSales((prevSales) => {
+            const saleExists = prevSales.some(
+                (sale) => sale.materialId === materialId && sale.forPeriod === periodId
+            );
+    
+            if (saleExists) {
+                // Aktualisiere den bestehenden Eintrag
+                return prevSales.map((sale) =>
+                    sale.materialId === materialId && sale.forPeriod === periodId
+                        ? { ...sale, amount: value }
+                        : sale
+                );
+            } else {
+                // Füge einen neuen Eintrag hinzu
+                const newSale = {
+                    id: Math.max(0, ...prevSales.map((s) => s.id)) + 1,
+                    periodId,
+                    materialId,
+                    forPeriod: periodId,
+                    amount: value,
+                };
+    
+                return [...prevSales, newSale];
+            }
+        });
+    };
 
     const updateLocalForecast = (periodId: number, productId: string, value: number) => {
         setLocalForecasts((prevForecasts) => {
@@ -90,6 +123,42 @@ export const ForecastProvider = ({
                 return [...prevDecisions, newDecision];
             }
         });
+    };
+
+    const updateApiAdditionalSale = async (periodId: number, forPeriodId: number, productId: string) => {
+        setIsUpdating(true);
+        const amount = getAdditionalSaleObjectByProductAndPeriod(localAdditionalSales, productId, forPeriodId)?.amount;
+
+        if (amount && amount > 0) {
+            try {
+                const response = await fetch(`/api/period/${periodId}/additional-sale`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        forPeriod: forPeriodId,
+                        materialId: productId,
+                        amount: amount,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Failed to update additional sale:', errorData.error || response.statusText);
+                } else {
+                    const additionalSale = await response.json();
+                    console.log('Additional sale updated successfully:', additionalSale);
+                }
+            } catch (error) {
+                console.error('Error while sending the request to update Additional sale:', error);
+            } finally {
+                setIsUpdating(false);
+            }
+        } else {
+            console.warn('Invalid data: periodId, amount, or amount <= 0');
+            setIsUpdating(false);
+        }
     };
 
     const updateApiForecast = async (periodId: number, forPeriodId: number, productId: string) => {
@@ -175,8 +244,10 @@ export const ForecastProvider = ({
                 localForecasts,
                 localProdDecisions,
                 isUpdating,
+                updateLocalAdditionalSales,
                 updateLocalForecast,
                 updateLocalDecision,
+                updateApiAdditionalSale,
                 updateApiForecast,
                 updateApiDecision,
                 setForecasts: setLocalForecasts,

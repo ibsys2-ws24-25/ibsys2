@@ -1,4 +1,4 @@
-import { Forecast, ProductionPlanDecision, Warehouse } from "@prisma/client";
+import { AdditionalSale, Forecast, ProductionPlanDecision, Warehouse } from "@prisma/client";
 
 /**
  * Findet ein Forecast-Objekt basierend auf dem Produkt und der Zielperiode.
@@ -33,6 +33,16 @@ export function getDecisionObjectByProductAndPeriod(
         (dc) => dc.materialId === productId && dc.forPeriod === periodId
     );
 }
+
+export function getAdditionalSaleObjectByProductAndPeriod(
+    additionalSales: AdditionalSale[],
+    productId: string,
+    periodId: number
+  ): Forecast | undefined {
+    return additionalSales.find(
+      (as) => as.materialId === productId && as.forPeriod === periodId
+    );
+  }
 
 export function getWarehouseStock(warhouse: Warehouse[], materialId: string): Warehouse | undefined {
     return warhouse.find((wh) => wh.materialId === materialId);

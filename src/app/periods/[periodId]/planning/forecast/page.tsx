@@ -1,5 +1,5 @@
 import ForecastPageComponent from "@/components/pages/forecast/patchedForecast/ForecastPageComponent";
-import { Forecast, PrismaClient, ProductionPlanDecision, Warehouse } from "@prisma/client";
+import { AdditionalSale, Forecast, PrismaClient, ProductionPlanDecision, Warehouse } from "@prisma/client";
 import { notFound } from "next/navigation";
 
 export interface ForecastProps {
@@ -7,6 +7,7 @@ export interface ForecastProps {
     forecasts: Forecast[];
     prodDecisions: ProductionPlanDecision[];
     warehouse: Warehouse[];
+    additionalSales: AdditionalSale[];
 };
 
 export default async function ForeCastPage({ params }: { params: { periodId: string } }) {
@@ -18,6 +19,7 @@ export default async function ForeCastPage({ params }: { params: { periodId: str
             Forecast: true,
             ProductionPlan: true,
             Warehouse: true,
+            AdditionalSale: true,
         },
     });
 
@@ -31,6 +33,7 @@ export default async function ForeCastPage({ params }: { params: { periodId: str
             forecasts={ period.Forecast }
             prodDecisions={ period.ProductionPlan }
             warehouse={ period.Warehouse }
+            additionalSales={ period.AdditionalSale }
         />
     );
 }

@@ -46,7 +46,7 @@ export async function POST(request: Request, { params }: { params: { periodId: s
             },
         });
       } else {
-        additionalSale = await prisma.forecast.create({
+        additionalSale = await prisma.additionalSale.create({
           data: {
             periodId: Number(params.periodId),
             materialId,

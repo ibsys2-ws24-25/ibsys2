@@ -8,6 +8,7 @@ import { getAdditionalSaleObjectByProductAndPeriod, getDecisionObjectByProductAn
 interface ForecastContextType {
     localForecasts: Forecast[];
     localProdDecisions: ProductionPlanDecision[];
+    localAdditionalSales: AdditionalSale[];
     isUpdating: boolean;
     updateLocalForecast: (periodId: number, productId: string, value: number) => void;
     updateLocalDecision: (periodId: number, materialId: string, value: number) => void;
@@ -243,6 +244,7 @@ export const ForecastProvider = ({
             value={{
                 localForecasts,
                 localProdDecisions,
+                localAdditionalSales,
                 isUpdating,
                 updateLocalAdditionalSales,
                 updateLocalForecast,

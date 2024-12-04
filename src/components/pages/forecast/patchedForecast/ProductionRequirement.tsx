@@ -2,11 +2,11 @@
 
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useForecastContext } from '@/context/ForecastContext';
-import { getDecisionObjectByProductAndPeriod, getForecastObjectByProductAndPeriod, getWarehouseStock } from '@/lib/forecastUtils';
+import { getAdditionalSaleObjectByProductAndPeriod, getDecisionObjectByProductAndPeriod, getForecastObjectByProductAndPeriod, getWarehouseStock } from '@/lib/forecastUtils';
 import { Warehouse } from '@prisma/client';
 
 export default function ProductionRequirement({ periodId, warehouse }: { periodId: number, warehouse: Warehouse[] }) {
-    const { localProdDecisions, localForecasts } = useForecastContext();
+    const { localProdDecisions, localForecasts, localAdditionalSales } = useForecastContext();
 
     return (
         <Table>
@@ -31,11 +31,12 @@ export default function ProductionRequirement({ periodId, warehouse }: { periodI
 
                             const forecast = getForecastObjectByProductAndPeriod(localForecasts, productId, period)?.amount || 0;
                             const safetyStock = getDecisionObjectByProductAndPeriod(localProdDecisions, productId, period)?.safetyStock || 0;
+                            const additionalSales = getAdditionalSaleObjectByProductAndPeriod(localAdditionalSales, productId, period)?.amount || 0;
 
                             const warehouseStock =
                                 (offset === 0
                                     ? initialWarehouseStock
-                                    : getDecisionObjectByProductAndPeriod(localProdDecisions, productId, period - 1)?.safetyStock || 0) - forecast - safetyStock;
+                                    : getDecisionObjectByProductAndPeriod(localProdDecisions, productId, period - 1)?.safetyStock || 0) - forecast - safetyStock - additionalSales;
 
                             const productionRequirement = warehouseStock < 1 ? Math.abs(warehouseStock) : 0;
 
@@ -58,11 +59,12 @@ export default function ProductionRequirement({ periodId, warehouse }: { periodI
                             const initialWarehouseStock = getWarehouseStock(warehouse, productId)?.amount || 0;
                             const forecast = getForecastObjectByProductAndPeriod(localForecasts, productId, period)?.amount || 0;
                             const safetyStock = getDecisionObjectByProductAndPeriod(localProdDecisions, productId, period)?.safetyStock || 0;
+                            const additionalSales = getAdditionalSaleObjectByProductAndPeriod(localAdditionalSales, productId, period)?.amount || 0;
 
                             const warehouseStock =
                                 (offset === 0
                                     ? initialWarehouseStock
-                                    : getDecisionObjectByProductAndPeriod(localProdDecisions, productId, period - 1)?.safetyStock || 0) - forecast - safetyStock;
+                                    : getDecisionObjectByProductAndPeriod(localProdDecisions, productId, period - 1)?.safetyStock || 0) - forecast - safetyStock - additionalSales;
 
                             const productionRequirement = warehouseStock < 1 ? Math.abs(warehouseStock) : 0;
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { ProductProductionPlan } from '@/lib/apiTypes';
 
 const prisma = new PrismaClient();
 
@@ -62,5 +63,82 @@ export async function POST(request: Request, { params }: { params: { periodId: s
       return NextResponse.json({ error: "Error creating or updating forecast decision" }, { status: 500 });
     } finally {
       await prisma.$disconnect();
+    }
+}
+
+export async function GET(request: Request, { params }: { params: { periodId: string } }) {
+    try {
+        const prodPlan: ProductProductionPlan[] = [];
+        const safetyStockDescicions = await prisma.productionPlanDecision.findMany({
+            where: {
+                periodId: Number(params.periodId),
+                materialId: {
+                    contains: "P",
+                },
+            },
+        });
+        
+        const forecasts = await prisma.forecast.findMany({
+            where: {
+                periodId: Number(params.periodId),
+                materialId: {
+                    contains: "P",
+                },
+            },
+        });
+
+        const warehouseEnties = await prisma.warehouse.findMany({
+            where: {
+                periodId: Number(params.periodId),
+                materialId: {
+                    contains: "P",
+                },
+            },
+        });
+
+        for (const forecast of forecasts) {
+            let warehouseStock = 0;
+        
+            // Finde die Safety Stock Decision
+            const safetyStockDecision = safetyStockDescicions.find(
+                ss => ss.forPeriod === forecast.periodId && ss.materialId === forecast.materialId
+            );
+        
+            // Bestimme den Safety Stock (Standardwert ist 0)
+            const safetyStock = safetyStockDecision ? safetyStockDecision.safetyStock : 0;
+        
+            if (forecast.forPeriod === parseInt(params.periodId)) {
+                // Warehouse Stock für die aktuelle Periode
+                const warehouseEntry = warehouseEnties.find(wh => wh.materialId === forecast.materialId);
+                warehouseStock = warehouseEntry ? warehouseEntry.amount : 0;
+            } else {
+                // Warehouse Stock aus der Safety Stock Decision der vorherigen Periode (bei zukünftigen Perioden)
+                const previousSafetyStockDecision = safetyStockDescicions.find(
+                    ss => ss.materialId === forecast.materialId && ss.forPeriod === forecast.periodId - 1
+                );
+                warehouseStock = previousSafetyStockDecision ? previousSafetyStockDecision.safetyStock : 0;
+            }
+        
+            // Berechnung der Differenz
+            const calculatedDiff = warehouseStock - forecast.amount - safetyStock;
+            let prodRequiremement = 0;
+
+            if (calculatedDiff < 0) {
+                prodRequiremement = Math.abs(calculatedDiff);
+            }
+
+            prodPlan.push({
+                periodId: forecast.forPeriod,
+                materialId: forecast.materialId,
+                amount: prodRequiremement,
+            });
+        }
+
+        return NextResponse.json(prodPlan);
+    } catch (error) {
+        console.error("Error fetching productionPlanDecision:", error);
+        return NextResponse.json({ error: "Error fetching productionPlanDecision" }, { status: 500 });
+    } finally {
+        await prisma.$disconnect();
     }
 }

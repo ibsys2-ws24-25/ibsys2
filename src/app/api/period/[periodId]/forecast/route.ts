@@ -96,6 +96,15 @@ export async function GET(request: Request, { params }: { params: { periodId: st
             },
         });
 
+        const additionalSales = await prisma.additionalSale.findMany({
+            where: {
+                periodId: Number(params.periodId),
+                materialId: {
+                    contains: "P",
+                },
+            },
+        });
+
         for (const forecast of forecasts) {
             let warehouseStock = 0;
         
@@ -103,9 +112,15 @@ export async function GET(request: Request, { params }: { params: { periodId: st
             const safetyStockDecision = safetyStockDescicions.find(
                 ss => ss.forPeriod === forecast.periodId && ss.materialId === forecast.materialId
             );
+
+            const additionalSale = additionalSales.find(
+                as => as.forPeriod === forecast.periodId && as.materialId === forecast.materialId
+            );
         
             // Bestimme den Safety Stock (Standardwert ist 0)
             const safetyStock = safetyStockDecision ? safetyStockDecision.safetyStock : 0;
+
+            const additionalSaleAmount = additionalSale ? additionalSale.amount : 0;
         
             if (forecast.forPeriod === parseInt(params.periodId)) {
                 // Warehouse Stock für die aktuelle Periode
@@ -120,7 +135,7 @@ export async function GET(request: Request, { params }: { params: { periodId: st
             }
         
             // Berechnung der Differenz
-            const calculatedDiff = warehouseStock - forecast.amount - safetyStock;
+            const calculatedDiff = warehouseStock - forecast.amount - safetyStock - additionalSaleAmount;
             let prodRequiremement = 0;
 
             if (calculatedDiff < 0) {

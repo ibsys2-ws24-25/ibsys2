@@ -18,7 +18,10 @@ export async function GET(request: Request, { params }: { params: { periodId: st
       where: { periodId, forPeriod: periodId },
     });
     const productionSafetyStocks = await prisma.productionPlanDecision.findMany({
-      where: { periodId },
+      where: { periodId, forPeriod: periodId },
+    });
+    const additionalSaleWishes = await prisma.additionalSale.findMany({
+      where: { periodId, forPeriod: periodId },
     });
     const defaultSafetyStockSetting = await prisma.setting.findUnique({
       where: { name: 'safety_stock_default' },
@@ -53,7 +56,8 @@ export async function GET(request: Request, { params }: { params: { periodId: st
     // Start processing for each forecast
     for (const forecast of forecasts) {
       const safetyStock = getSafetyStock(forecast.materialId);
-      const totalRequirement = forecast.amount + safetyStock;
+      const additionalSaleWish = additionalSaleWishes.find(as => (as.materialId === forecast.materialId))?.amount || 0;
+      const totalRequirement = forecast.amount + safetyStock + additionalSaleWish;
 
       processMaterial(forecast.materialId, totalRequirement);
     }

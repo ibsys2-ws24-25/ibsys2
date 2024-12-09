@@ -38,9 +38,15 @@ export default async function PurchasePartPage({ params }: { params: { periodId:
             periodId: Number(params.periodId),
         }
     })
+    const orderDecisions = await prisma.orderDecision.findMany({
+        where: {
+            periodId: Number(params.periodId)
+        }
+    })
+
     return (
         <div>
-            <PurchaseTable orders={ orders } purchaseParts={ purchaseParts } periodId={params.periodId}/>
+            <PurchaseTable orders={ orders } purchaseParts={ purchaseParts } periodId={params.periodId} orderDecisions={ orderDecisions }/>
         </div>
     );
 }

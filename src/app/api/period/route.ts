@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, WaitingQueue } from '@prisma/client';
 import { parseStringPromise } from 'xml2js';
 
 export async function GET() {
@@ -168,6 +168,42 @@ export async function POST(request: Request) {
                 } else {
                     console.warn('No valid orders to save.');
                 }
+            }
+
+            // waiting queue
+            if (results.waitinglistworkstations && results.waitinglistworkstations[0] && results.waitinglistworkstations[0].workplace) {
+                const waitinglistEntities = [];
+                const workplaces = results.waitinglistworkstations[0].workplace;
+                for (const workplace of workplaces) {
+                    if (workplace.waitinglist) {
+                        const waitinglist = workplace.waitinglist;
+
+                        for (const waitinglistElement of waitinglist) {
+                            if (waitinglistElement.$) {
+                                const material = await prisma.material.findFirst({
+                                    where: { id: {
+                                        endsWith: waitinglistElement.$.item,
+                                    }},
+                                });
+                                if (material) {
+                                    waitinglistEntities.push({
+                                        orderId: Number(waitinglistElement.$.order),
+                                        firstBatch: Number(waitinglistElement.$.firstbatch),
+                                        lastBatch: Number(waitinglistElement.$.lastbatch),
+                                        amount: Number(waitinglistElement.$.amount),
+                                        timeneed: Number(waitinglistElement.$.timeneed),
+                                        periodId: newPeriod.id,
+                                        materialId: material.id,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                await prisma.waitingQueue.createMany({
+                    data: waitinglistEntities,
+                });
             }
         }
         

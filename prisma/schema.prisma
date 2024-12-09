@@ -22,6 +22,7 @@ model Material {
   Order               Order[]
   OrderDecision       OrderDecision[]
   AdditionalSale      AdditionalSale[]
+  WaitingQueue        WaitingQueue[]
 }
 
 model MaterialRequirement {
@@ -42,6 +43,7 @@ model Period {
   Order          Order[]
   OrderDecision  OrderDecision[]
   AdditionalSale AdditionalSale[]
+  WaitingQueue   WaitingQueue[]
 }
 
 model Warehouse {
@@ -117,4 +119,17 @@ model OrderDecision {
 model Setting {
   name  String @id
   value String
+}
+
+model WaitingQueue {
+  id         Int      @id @default(autoincrement())
+  Period     Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  orderId    Int
+  firstBatch Int
+  lastBatch  Int
+  Material   Material @relation(fields: [materialId], references: [id])
+  amount     Int
+  timeneed   Int
+  periodId   Int
+  materialId String
 }

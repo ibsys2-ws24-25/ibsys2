@@ -239,6 +239,34 @@ export async function POST(request: Request) {
                     data: waitinglistEntities,
                 });
             }
+
+            if (results.ordersinwork && results.ordersinwork[0] && results.ordersinwork[0].workplace) {
+                const workplaces = results.ordersinwork[0].workplace;
+                const waitinglistEntities = [];
+
+                for (const workplace of workplaces) {
+                    if (workplace.$) {
+                        const material = await prisma.material.findFirst({
+                            where: { id: {
+                                endsWith: workplace.$.item,
+                            }},
+                        });
+                        if (material) {
+                            waitinglistEntities.push({
+                                orderId: Number(workplace.$.order),
+                                amount: Number(workplace.$.amount),
+                                timeneed: Number(workplace.$.timeneed),
+                                periodId: newPeriod.id,
+                                materialId: material.id,
+                            });
+                        }
+                    }
+                }
+
+                await prisma.waitingQueue.createMany({
+                    data: waitinglistEntities,
+                });
+            }
         }
         
         return NextResponse.json(

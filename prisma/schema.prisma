@@ -125,8 +125,8 @@ model WaitingQueue {
   id         Int      @id @default(autoincrement())
   Period     Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
   orderId    Int
-  firstBatch Int
-  lastBatch  Int
+  firstBatch Int?
+  lastBatch  Int?
   Material   Material @relation(fields: [materialId], references: [id])
   amount     Int
   timeneed   Int

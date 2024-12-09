@@ -194,6 +194,7 @@ export async function POST(request: Request) {
                                         timeneed: Number(waitinglistElement.$.timeneed),
                                         periodId: newPeriod.id,
                                         materialId: material.id,
+                                        workplaceId: Number(workplace.$.id)
                                     });
                                 }
                             }

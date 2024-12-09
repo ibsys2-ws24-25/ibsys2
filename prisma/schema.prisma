@@ -175,4 +175,5 @@ model WaitingQueue {
   timeneed   Int
   periodId   Int
   materialId String
+  workplaceId Int?
 }

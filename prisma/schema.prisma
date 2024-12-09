@@ -21,6 +21,7 @@ model Material {
   variance            Float?
   Order               Order[]
   Workplaces          WorkplaceMaterial[]
+  ProductionListWorkplace   productionListOfWorkplace[]
 }
 
 model MaterialRequirement {
@@ -39,6 +40,7 @@ model Period {
   Forecast       Forecast[]
   ProductionPlan ProductionPlanDecision[]
   Workplace      Workplace[]
+  ProductionList  productionListOfWorkplace[]
 }
 
 model Warehouse {
@@ -76,6 +78,17 @@ model WorkplaceMaterial {
   Workplace    WorkplaceHelper @relation(fields: [workplaceId], references: [id])
   Material     Material  @relation(fields: [materialId], references: [id])
   @@id([workplaceId, materialId])
+}
+
+model productionListOfWorkplace {
+  id      Int       @id @default(autoincrement())
+  periodId  Int     
+  materialId  String
+  quantity    Int
+  priority    Int      @unique
+  Period      Period   @relation(fields: [periodId], references: [id])
+  Material    Material @relation(fields: [materialId], references: [id])
+	@@map("productionList")
 }
 
 model Forecast {

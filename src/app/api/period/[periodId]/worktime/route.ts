@@ -125,3 +125,82 @@ export async function calculateTotalCapacity(request: Request, { params }: { par
         await prisma.$disconnect();
     }
 }
+
+export async function createProductionOrderEntries(request: Request, { params }: { params: { periodId: string } }) {
+    const currentPeriod = Number(params.periodId);
+
+    try {
+        const { productionOrders } = await request.json();
+    
+        if (!Array.isArray(productionOrders)) {
+          return NextResponse.json(
+            { error: "Invalid input format. 'productionOrders' must be an array." },
+            { status: 400 }
+          );
+        }
+    
+        const prioritySet = new Set<number>();
+        for (const order of productionOrders) {
+          if (prioritySet.has(order.priority)) {
+            return NextResponse.json(
+              { error: `Duplicate priority detected: ${order.priority}` },
+              { status: 400 }
+            );
+          }
+          prioritySet.add(order.priority);
+        }
+    
+        const validMaterials = await prisma.material.findMany({
+          where: { id: { in: productionOrders.map((o) => o.materialId) } },
+        });
+        const validMaterialIds = new Set(validMaterials.map((m) => m.id));
+    
+        for (const order of productionOrders) {
+          if (!validMaterialIds.has(order.materialId)) {
+            return NextResponse.json(
+              { error: `Invalid materialId: ${order.materialId}` },
+              { status: 400 }
+            );
+          }
+        }
+    
+        await prisma.$transaction(async (tx) => {
+          for (const order of productionOrders) {
+            const { id, materialId, quantity, priority } = order;
+    
+            if (!materialId || quantity <= 0 || priority <= 0) {
+              throw new Error(`Invalid data for production order: ${JSON.stringify(order)}`);
+            }
+    
+            if (id > 0) {
+              await tx.productionListOfWorkplace.update({
+                where: { id },
+                data: {
+                  quantity,
+                  priority,
+                },
+              });
+            } else {
+              await tx.productionListOfWorkplace.create({
+                data: {
+                  materialId,
+                  quantity,
+                  priority,
+                  periodId: currentPeriod,
+                },
+              });
+            }
+          }
+        });
+    
+        return NextResponse.json({ message: "Production orders updated successfully." });
+      } catch (error) {
+        console.error("Error updating production orders:", error);
+        return NextResponse.json(
+          { error: error instanceof Error ? error.message : "Unknown error occurred." },
+          { status: 500 }
+        );
+      } finally {
+        await prisma.$disconnect();
+      }
+  }

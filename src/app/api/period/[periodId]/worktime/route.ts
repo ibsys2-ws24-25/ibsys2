@@ -84,6 +84,17 @@ export async function calculateTotalCapacity(request: Request, { params }: { par
         const workplaceHelpers = await prisma.workplaceHelper.findMany();
         const workplaceHelperMap = Object.fromEntries(workplaceHelpers.map((helper) => [helper.id, helper]));
 
+        const waitingQueueEntries = await prisma.waitingQueue.findMany({
+            where: { periodId },
+        });
+
+        const previousCapacityMap = waitingQueueEntries.reduce<Record<number, number>>((acc, entry) => {
+            if (entry.workplaceId) {
+                acc[entry.workplaceId] = (acc[entry.workplaceId] || 0) + entry.timeneed;
+            }
+            return acc;
+        }, {});
+
         for (const material of materials) {
             const productionQuantity = productionPlan[material.id];
 
@@ -99,6 +110,11 @@ export async function calculateTotalCapacity(request: Request, { params }: { par
                 const materialCapacity = productionQuantity * procurementTime + workplaceHelper.setupTime;
                 workplaceCapacityMap[workplaceId] = (workplaceCapacityMap[workplaceId] || 0) + materialCapacity;
             }
+        }
+
+        for (const [workplaceId, previousCapacity] of Object.entries(previousCapacityMap)) {
+            workplaceCapacityMap[Number(workplaceId)] =
+                (workplaceCapacityMap[Number(workplaceId)] || 0) + previousCapacity;
         }
 
         const existingPeriod = await prisma.period.findUnique({

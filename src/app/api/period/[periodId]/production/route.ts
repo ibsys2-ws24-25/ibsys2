@@ -20,7 +20,7 @@ export async function GET(request: Request, { params }: { params: { periodId: st
   }
 }
 
-//productiinPlanDecision
+//productionPlanDecision
 export async function POST(request: Request, { params }: { params: { periodId: string } }) {
   try {
     const { materialId, productId, safetyStock, forPeriod} = await request.json();

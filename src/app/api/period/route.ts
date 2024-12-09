@@ -145,7 +145,7 @@ export async function POST(request: Request) {
                             }
                         }
                     })
-            
+                    
                     if (material) {
                         ordersToCreate.push({
                             orderId: Number(order.$.id),
@@ -153,6 +153,7 @@ export async function POST(request: Request) {
                             mode: Number(order.$.mode),
                             amount: Number(order.$.amount),
                             materialId: material.id,
+                            periodId: newPeriod.id,
                         });
                     } else {
                         console.warn(`Material ID ${materialId} does not exist. Skipping order.`);

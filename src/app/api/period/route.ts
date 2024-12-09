@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient, WaitingQueue } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { parseStringPromise } from 'xml2js';
 
 export async function GET() {

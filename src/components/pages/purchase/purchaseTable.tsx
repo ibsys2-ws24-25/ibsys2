@@ -4,47 +4,71 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "@/components/ui/table";
 import { PurchaseParts } from "@/lib/prodUtils";
-import { Order } from "@prisma/client";
-import { useState } from "react";
+import { Order, OrderDecision } from "@prisma/client";
+import { useEffect, useState } from "react";
 
 export interface PurchaseTableProps {
     purchaseParts: PurchaseParts[];
     periodId: number;
     orders: Order[];
+    orderDecisions: OrderDecision[];
 }
 
-const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) => {
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [inputValues, setInputValues] = useState<{ [key: string]: number }>({});
+const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions }: PurchaseTableProps) => {
+  const [isUpdatingRow, setIsUpdatingRow] = useState<{ [key: string]: boolean }>({});
+  const [inputValues, setInputValues] = useState<{ [key: string]: { amount: number; mode: number } }>({});
 
-  const handleInputChange = (materialId: string, value: number) => {
+  useEffect(() => {
+    const initialValues: { [key: string]: { amount: number; mode: number } } = {};
+
+    orderDecisions.forEach((decision) => {
+      initialValues[decision.materialId] = {
+        amount: decision.amount,
+        mode: decision.mode,
+      };
+    });
+
+    setInputValues(initialValues);
+  }, [orderDecisions]);
+
+  const handleInputChange = (materialId: string, key: 'amount' | 'mode', value: number) => {
     setInputValues((prev) => ({
       ...prev,
-      [materialId]: value,
+      [materialId]: {
+        ...prev[materialId],
+        [key]: value,
+      },
     }));
   };
 
-  const saveAllValues = async () => {
-    setIsUpdating(true);
+  const saveRowValues = async (materialId: string) => {
+    setIsUpdatingRow((prev) => ({ ...prev, [materialId]: true }));
+    const rowValues = inputValues[materialId] || {};
+
     try {
-      const response = await fetch(`/api/period/${periodId}/order`, {
+      const response = await fetch(`/api/period/${periodId}/orderDecision`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(inputValues),
+        body: JSON.stringify({
+          materialId,
+          amount: rowValues.amount || 0,
+          mode: rowValues.mode || 0,
+          orderPeriod: Number(periodId),
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save values.");
+        throw new Error("Failed to save values for the row.");
       }
 
-      alert("Values saved successfully!");
+      console.log(`Values for material ${materialId} saved successfully!`);
     } catch (error) {
-      console.error("Error saving values:", error);
-      alert("Error saving values. Please try again.");
+      console.error(`Error saving values for material ${materialId}:`, error);
+      console.log(`Error saving values for material ${materialId}. Please try again.`);
     } finally {
-      setIsUpdating(false);
+      setIsUpdatingRow((prev) => ({ ...prev, [materialId]: false }));
     }
   };
 
@@ -98,13 +122,15 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                   </div>
               </div>
             </TableHead>
+            <TableHead>
+              <div>test</div>
+            </TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
           {purchaseParts.map((material) => {
             const materialOrders = orders.filter((order) => order.materialId === material.materialId);
-
             return (
               <TableRow key={material.materialId}>
                   <TableCell>
@@ -133,14 +159,16 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                   <TableCell>
                     <div className="">
                       {materialOrders.length > 0 ? (
-                        <div className="flex justify-center items-center w-full">
+                        <div className="flex flex-col justify-center items-center w-full">
                           {materialOrders.map((order) => (
-                            <><span className="w-1/2 text-center" key={order.orderId}>
-                              {order.amount}
-                            </span>
-                            <span className="w-1/2 text-center" key={order.orderId}>
-                              {Math.round(order.orderPeriod + material.deliveryTime)} / {Math.round(order.orderPeriod + material.deliveryTime + material.variance)}
-                            </span></>
+                            <div key={order.orderId} className="w-full flex items-center">
+                              <span className="w-1/2 text-center">
+                                {order.amount}
+                              </span>
+                              <span className="w-1/2 text-center">
+                                {Math.round(order.orderPeriod + material.deliveryTime)} / {Math.round(order.orderPeriod + material.deliveryTime + material.variance)}
+                              </span>
+                            </div>
                           ))}
                         </div>
                       ) : (
@@ -154,13 +182,21 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                         type="number"
                         min={0}
                         step={100}
-                        disabled={ isUpdating }
-                        value={inputValues[material.materialId] || ""}
+                        value={inputValues[material.materialId]?.amount || ""}
                         onChange={(e) =>
-                          handleInputChange(material.materialId, parseInt(e.target.value, 10) || 0)
+                          handleInputChange(material.materialId, "amount", parseInt(e.target.value, 10) || 0)
                         }
-                        className="text-center w-3/4"/>
-                      <span className="flex-1 text-center w 1/4 p-3">ToDO</span>
+                        disabled={isUpdatingRow[material.materialId]}
+                        className="text-center w-2/3  mr-1"/>
+                      <Input
+                        type="number"
+                        value={inputValues[material.materialId]?.mode || ""}
+                        onChange={(e) =>
+                          handleInputChange(material.materialId, "mode", parseInt(e.target.value, 10) || 0)
+                        }
+                        disabled={isUpdatingRow[material.materialId]}
+                        className="flex-1 text-center w 1/3 p-3"
+                      />
                     </div>
                   </TableCell>
                   <TableCell>
@@ -171,20 +207,19 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                       <span className="flex-1 text-center">ToDO</span>
                     </div>
                   </TableCell>
+                  <TableCell>
+                  <Button
+                    onClick={() => saveRowValues(material.materialId)}
+                    disabled={isUpdatingRow[material.materialId]}
+                  >
+                    {isUpdatingRow[material.materialId] ? "Saving..." : "Save"}
+                  </Button>
+                  </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-      <div className="flex w-full justify-center mt-3">
-        <Button
-          onClick={saveAllValues}
-          disabled={isUpdating}
-          className="w-1/4"
-        >
-          {isUpdating ? "Saving..." : "Save All"}
-        </Button>
-      </div>
     </div>
   );
 }

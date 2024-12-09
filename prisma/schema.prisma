@@ -21,6 +21,7 @@ model Material {
   variance            Float?
   Order               Order[]
   OrderDecision       OrderDecision[]
+  AdditionalSale      AdditionalSale[]
 }
 
 model MaterialRequirement {
@@ -40,6 +41,7 @@ model Period {
   ProductionPlan ProductionPlanDecision[]
   Order          Order[]
   OrderDecision  OrderDecision[]
+  AdditionalSale AdditionalSale[]
 }
 
 model Warehouse {
@@ -59,6 +61,20 @@ model Forecast {
   periodId   Int
   materialId String
   amount     Int
+
+  @@unique([periodId, materialId, forPeriod])
+}
+
+model AdditionalSale {
+  id         Int      @id @default(autoincrement())
+  Period     Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  Material   Material @relation(fields: [materialId], references: [id])
+  forPeriod  Int
+  amount     Int
+  periodId   Int
+  materialId String
+
+  @@unique([periodId, forPeriod, materialId])
 }
 
 model ProductionPlanDecision {

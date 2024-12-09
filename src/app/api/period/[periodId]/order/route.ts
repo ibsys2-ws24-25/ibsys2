@@ -25,9 +25,10 @@ export async function POST(request: Request, { params }: { params: { periodId: s
   
       let decision = await prisma.order.findUnique({
         where: {
-            orderPeriod_materialId: {
+            orderPeriod_materialId_periodId: {
                 materialId,
                 orderPeriod: orderPeriodSet,
+                periodId: Number(params.periodId),
           },
         },
       });
@@ -35,9 +36,10 @@ export async function POST(request: Request, { params }: { params: { periodId: s
       if (decision) {
         decision = await prisma.order.update({
           where: {
-            orderPeriod_materialId: {
+            orderPeriod_materialId_periodId: {
                 materialId,
                 orderPeriod: orderPeriodSet,
+                periodId: Number(params.periodId),
           },
           },
           data: {
@@ -52,6 +54,7 @@ export async function POST(request: Request, { params }: { params: { periodId: s
             orderPeriod: Number(params.periodId),
             amount,
             mode,
+            periodId: Number(params.periodId)
           },
         });
       }

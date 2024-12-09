@@ -135,10 +135,10 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                       {materialOrders.length > 0 ? (
                         <div className="flex justify-center items-center w-full">
                           {materialOrders.map((order) => (
-                            <><span className="w-1/2 text-center" key={order.id}>
+                            <><span className="w-1/2 text-center" key={order.orderId}>
                               {order.amount}
                             </span>
-                            <span className="w-1/2 text-center" key={order.id}>
+                            <span className="w-1/2 text-center" key={order.orderId}>
                               {Math.round(order.orderPeriod + material.deliveryTime)} / {Math.round(order.orderPeriod + material.deliveryTime + material.variance)}
                             </span></>
                           ))}

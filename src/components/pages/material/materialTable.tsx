@@ -4,7 +4,7 @@ import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from "@
 import { Input } from "@/components/ui/input";
 import { ProductionPlan } from "@/lib/prodUtils";
 import { useCallback, useEffect, useState } from "react";
-import { ProductionPlanDecision } from "@prisma/client";
+import { Forecast, ProductionPlanDecision, WaitingQueue } from "@prisma/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export interface MaterialTableProps {
@@ -13,6 +13,8 @@ export interface MaterialTableProps {
     periodId: string;
     productId: string;
     decisions: ProductionPlanDecision[];
+    waitingQueue: WaitingQueue[];
+    forecasts: Forecast[];
 }
 
 interface SafetyStockInputValue {
@@ -20,7 +22,7 @@ interface SafetyStockInputValue {
     value: number;
 }
 
-const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productId, decisions }: MaterialTableProps) => {
+const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productId, decisions, waitingQueue, forecasts }: MaterialTableProps) => {
     const [isUpdating, setIsUpdating] = useState<boolean>(true);
     const [productionPlanInit, setProductionPlanInit] = useState<boolean>(true);
     const [fetchedProductionPlan, setFetchedProductionPlan] = useState<Map<string, number> | undefined>(undefined);
@@ -100,6 +102,12 @@ const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productI
         }
     }, [periodId]);
 
+    const getWaitingQueueSum = (materialId: string) => {
+      return waitingQueue
+        .filter((item) => item.materialId === materialId)
+        .reduce((sum, item) => sum + item.amount, 0);
+    };
+
     useEffect(() => {
         if (productionPlanInit) {
             fetchProductionPlan();
@@ -117,8 +125,7 @@ const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productI
                         <TableHead>Sales Orders</TableHead>
                         <TableHead>Safety Stock</TableHead>
                         <TableHead>Warehouse Stock</TableHead>
-                        <TableHead>Orders in Queue</TableHead>
-                        <TableHead>Work in Progress</TableHead>
+                        <TableHead>Orders in Queue /<br />Work in Progress</TableHead>
                         <TableHead>Production Orders</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -129,7 +136,11 @@ const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productI
                                 {material.materialId}
                             </TableCell>
                             <TableCell>
-                                { material.salesPlan }
+                                {
+                                  material.materialId.includes("P") && (
+                                    forecasts.find(fc => fc.materialId === material.materialId)?.amount || 0
+                                  )
+                                }
                             </TableCell>
                             <TableCell>
                             <Input
@@ -154,10 +165,9 @@ const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productI
                                 {material.warehouseStock}
                             </TableCell>
                             <TableCell>
-                                {material.queueOrders}
-                            </TableCell>
-                            <TableCell>
-                                {material.workInProgress}
+                                {
+                                  getWaitingQueueSum(material.materialId)
+                                }
                             </TableCell>
                             <TableCell>
                                 {

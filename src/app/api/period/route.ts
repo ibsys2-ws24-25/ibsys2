@@ -72,21 +72,21 @@ export async function POST(request: Request) {
                 
                 if (forecast.$) {
                     forecastEntities.push({
-                        forPeriod: (Number(id) + 1),
+                        forPeriod: Number(id),
                         periodId: Number(id),
                         materialId: "P1",
                         amount: Number(forecast.$.p1),
                     });
 
                     forecastEntities.push({
-                        forPeriod: (Number(id) + 1),
+                        forPeriod: Number(id),
                         periodId: Number(id),
                         materialId: "P2",
                         amount: Number(forecast.$.p2),
                     });
 
                     forecastEntities.push({
-                        forPeriod: (Number(id) + 1),
+                        forPeriod: Number(id),
                         periodId: Number(id),
                         materialId: "P3",
                         amount: Number(forecast.$.p3),
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
                             }
                         }
                     })
-            
+                    
                     if (material) {
                         ordersToCreate.push({
                             orderId: Number(order.$.id),
@@ -153,6 +153,7 @@ export async function POST(request: Request) {
                             mode: Number(order.$.mode),
                             amount: Number(order.$.amount),
                             materialId: material.id,
+                            periodId: newPeriod.id,
                         });
                     } else {
                         console.warn(`Material ID ${materialId} does not exist. Skipping order.`);
@@ -167,6 +168,104 @@ export async function POST(request: Request) {
                 } else {
                     console.warn('No valid orders to save.');
                 }
+            }
+
+            // waiting queue
+            if (results.waitinglistworkstations && results.waitinglistworkstations[0] && results.waitinglistworkstations[0].workplace) {
+                const waitinglistEntities = [];
+                const workplaces = results.waitinglistworkstations[0].workplace;
+                for (const workplace of workplaces) {
+                    if (workplace.waitinglist) {
+                        const waitinglist = workplace.waitinglist;
+
+                        for (const waitinglistElement of waitinglist) {
+                            if (waitinglistElement.$) {
+                                const material = await prisma.material.findFirst({
+                                    where: { id: {
+                                        endsWith: waitinglistElement.$.item,
+                                    }},
+                                });
+                                if (material) {
+                                    waitinglistEntities.push({
+                                        orderId: Number(waitinglistElement.$.order),
+                                        firstBatch: Number(waitinglistElement.$.firstbatch),
+                                        lastBatch: Number(waitinglistElement.$.lastbatch),
+                                        amount: Number(waitinglistElement.$.amount),
+                                        timeneed: Number(waitinglistElement.$.timeneed),
+                                        periodId: newPeriod.id,
+                                        materialId: material.id,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                await prisma.waitingQueue.createMany({
+                    data: waitinglistEntities,
+                });
+            }
+
+            if (results.waitingliststock && results.waitingliststock[0] && results.waitingliststock[0].missingpart) {
+                const waitinglistEntities = [];
+                for (const missingpart of results.waitingliststock[0].missingpart) {
+                    if (missingpart.workplace) {
+                        for (const queue of missingpart.workplace) {
+                            for (const waitinglistElement of queue.waitinglist) {
+                                if (waitinglistElement.$) {
+                                    const material = await prisma.material.findFirst({
+                                        where: { id: {
+                                            endsWith: waitinglistElement.$.item,
+                                        }},
+                                    });
+                                    if (material) {
+                                        waitinglistEntities.push({
+                                            orderId: Number(waitinglistElement.$.order),
+                                            firstBatch: Number(waitinglistElement.$.firstbatch),
+                                            lastBatch: Number(waitinglistElement.$.lastbatch),
+                                            amount: Number(waitinglistElement.$.amount),
+                                            timeneed: Number(waitinglistElement.$.timeNeed),
+                                            periodId: newPeriod.id,
+                                            materialId: material.id,
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                await prisma.waitingQueue.createMany({
+                    data: waitinglistEntities,
+                });
+            }
+
+            if (results.ordersinwork && results.ordersinwork[0] && results.ordersinwork[0].workplace) {
+                const workplaces = results.ordersinwork[0].workplace;
+                const waitinglistEntities = [];
+
+                for (const workplace of workplaces) {
+                    if (workplace.$) {
+                        const material = await prisma.material.findFirst({
+                            where: { id: {
+                                endsWith: workplace.$.item,
+                            }},
+                        });
+                        if (material) {
+                            waitinglistEntities.push({
+                                orderId: Number(workplace.$.order),
+                                amount: Number(workplace.$.amount),
+                                timeneed: Number(workplace.$.timeneed),
+                                periodId: newPeriod.id,
+                                materialId: material.id,
+                            });
+                        }
+                    }
+                }
+
+                await prisma.waitingQueue.createMany({
+                    data: waitinglistEntities,
+                });
             }
         }
         

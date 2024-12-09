@@ -20,10 +20,16 @@ export async function GET(request: Request, { params }: { params: { periodId: st
   }
 }
 
-//productiinPlanDecision
+//productionPlanDecision
 export async function POST(request: Request, { params }: { params: { periodId: string } }) {
   try {
     const { materialId, productId, safetyStock, forPeriod} = await request.json();
+    let forPeriodSet = undefined;
+    if (!forPeriod) {
+        forPeriodSet = parseInt(params.periodId);
+    } else {
+        forPeriodSet = forPeriod;
+    }
     console.log(`Received data - PeriodID: ${params.periodId}, MaterialID: ${materialId}, ProductID: ${productId}, SafetyStock: ${safetyStock}, ForPeriod: ${forPeriod}`);
 
     const periodExists = await prisma.period.findUnique({
@@ -41,7 +47,7 @@ export async function POST(request: Request, { params }: { params: { periodId: s
           periodId: Number(params.periodId),
           materialId,
           productId,
-          forPeriod,
+          forPeriod: forPeriodSet,
         },
       },
     });
@@ -53,7 +59,7 @@ export async function POST(request: Request, { params }: { params: { periodId: s
                 periodId: Number(params.periodId),
                 materialId,
                 productId,
-                forPeriod,
+                forPeriod: forPeriodSet,
             },
         },
         data: {
@@ -67,7 +73,7 @@ export async function POST(request: Request, { params }: { params: { periodId: s
           materialId,
           safetyStock,
           productId,
-          forPeriod,
+          forPeriod: forPeriodSet,
         },
       });
     }

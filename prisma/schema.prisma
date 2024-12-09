@@ -20,6 +20,9 @@ model Material {
   deliveryTime        Float?
   variance            Float?
   Order               Order[]
+  OrderDecision       OrderDecision[]
+  AdditionalSale      AdditionalSale[]
+  WaitingQueue        WaitingQueue[]
   Workplaces          WorkplaceMaterial[]
   ProductionListWorkplace   productionListOfWorkplace[]
 }
@@ -39,6 +42,10 @@ model Period {
   Warehouse      Warehouse[]
   Forecast       Forecast[]
   ProductionPlan ProductionPlanDecision[]
+  Order          Order[]
+  OrderDecision  OrderDecision[]
+  AdditionalSale AdditionalSale[]
+  WaitingQueue   WaitingQueue[]
   Workplace      Workplace[]
   ProductionList  productionListOfWorkplace[]
 }
@@ -99,6 +106,20 @@ model Forecast {
   periodId   Int
   materialId String
   amount     Int
+
+  @@unique([periodId, materialId, forPeriod])
+}
+
+model AdditionalSale {
+  id         Int      @id @default(autoincrement())
+  Period     Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  Material   Material @relation(fields: [materialId], references: [id])
+  forPeriod  Int
+  amount     Int
+  periodId   Int
+  materialId String
+
+  @@unique([periodId, forPeriod, materialId])
 }
 
 model ProductionPlanDecision {
@@ -109,22 +130,49 @@ model ProductionPlanDecision {
   materialId  String
   safetyStock Int
   productId   String
-  forPeriod   Int?  
+  forPeriod   Int?
 
   @@unique([periodId, materialId, productId, forPeriod])
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
-  orderId     Int
+  orderId     Int?
   orderPeriod Int
   mode        Int
   Material    Material @relation(fields: [materialId], references: [id])
-  amount      Int 
+  Period      Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  amount      Int
   materialId  String
+  periodId    Int
+
+  @@unique([orderPeriod, materialId, periodId])
+}
+
+model OrderDecision {
+  Period     Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  Material   Material @relation(fields: [materialId], references: [id])
+  amount     Int
+  mode       Int
+  periodId   Int
+  materialId String
+
+  @@unique([periodId, materialId])
 }
 
 model Setting {
   name  String @id
   value String
+}
+
+model WaitingQueue {
+  id         Int      @id @default(autoincrement())
+  Period     Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  orderId    Int
+  firstBatch Int?
+  lastBatch  Int?
+  Material   Material @relation(fields: [materialId], references: [id])
+  amount     Int
+  timeneed   Int
+  periodId   Int
+  materialId String
 }

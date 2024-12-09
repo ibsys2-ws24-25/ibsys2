@@ -46,60 +46,34 @@ export async function GET(request: Request, { params }: { params: { periodId: st
       }
     };
 
-    // Recursive function to process requirements
-    const processMaterial = (materialId: string, requiredAmount: number) => {
+    // Start processing for each forecast
+    const addRequirements = (materialId: string, amount: number) => {
       const material = getMaterial(materialId);
-      if (!material) {
-        console.error(`Material ${materialId} not found.`);
-        return;
-      }
+      const safetyStock = getSafetyStock(materialId);
+      const additionalSaleWish = additionalSaleWishes.find(as => (as.materialId === materialId))?.amount || 0;
+      const warehouseStock = getWarehouseStock(materialId);
+      const totalRequirement = amount + safetyStock + additionalSaleWish;
+      // console.log(`Adding Material ${materialId}`)
+      // console.log(`Total Requirement: ${totalRequirement}`);
 
-      // Update the manufacturing requirement for this material
-      const currentRequirement = manufacturingRequirement.get(materialId) || 0;
-
-      let requirementAfterWarehouse = 0;
-      if (!materialId.includes("P")) {
-        requirementAfterWarehouse = getWarehouseStock(materialId) - currentRequirement - requiredAmount - getSafetyStock(materialId);
+      if (warehouseStock < totalRequirement) {
+        updateWarehouseStock(materialId, 0);
+        manufacturingRequirement.set(materialId, totalRequirement - warehouseStock);
+        // console.log(material?.MaterialsRequired);
+        if (material?.MaterialsRequired) {
+          for (const subMaterial of material?.MaterialsRequired) {
+            if (subMaterial.requiredMaterialId.includes("E")) {
+              addRequirements(subMaterial.requiredMaterialId, (totalRequirement - warehouseStock) * subMaterial.sum);
+            }
+          }
+        }
       } else {
-        requirementAfterWarehouse = getWarehouseStock(materialId) - currentRequirement - requiredAmount;
-      }
-
-      if (requirementAfterWarehouse < 0) {
-        manufacturingRequirement.set(materialId, Math.abs(requirementAfterWarehouse));
-      }
-
-      // console.log(`Material ${materialId}: WHs: ${getWarehouseStock(materialId)}; currentRequirement: ${currentRequirement}; requiredAmount: ${requiredAmount}; requiredAfterWarehouse: ${Math.abs(requirementAfterWarehouse)}`);
-
-      // Reduce Warehouse entry
-      if (getWarehouseStock(materialId) > 0) {
-        if (requirementAfterWarehouse < 0) {
-          updateWarehouseStock(materialId, 0);
-        } else {
-          updateWarehouseStock(materialId, requirementAfterWarehouse);
-        }
-      }
-
-      // Process dependencies recursively
-      for (const dependency of material.MaterialsRequired) {
-        if (requirementAfterWarehouse < 0) {
-          const dependencyAmount = dependency.sum * Math.abs(requirementAfterWarehouse);
-          // console.log(`API Call: processMaterial(${dependency.requiredMaterialId}, ${Math.abs(requirementAfterWarehouse)})`)
-          processMaterial(dependency.requiredMaterialId, dependencyAmount);
-        }
+        updateWarehouseStock(materialId, warehouseStock - totalRequirement);
       }
     };
 
-    // Start processing for each forecast
     for (const forecast of forecasts) {
-      const safetyStock = getSafetyStock(forecast.materialId);
-      const additionalSaleWish = additionalSaleWishes.find(as => (as.materialId === forecast.materialId))?.amount || 0;
-      const warehouseStock = getWarehouseStock(forecast.materialId);
-      const totalRequirement = forecast.amount + safetyStock + additionalSaleWish;
-      // console.log(`Product ${forecast.materialId}: ws: ${getWarehouseStock(forecast.materialId)}; fc: ${forecast.amount}; ss: ${safetyStock}; sw: ${additionalSaleWish}`);
-
-      if (warehouseStock < totalRequirement) {
-        processMaterial(forecast.materialId, Math.abs(totalRequirement - warehouseStock));
-      }
+      addRequirements(forecast.materialId, forecast.amount);
     }
 
     // Convert Map to plain object for JSON response

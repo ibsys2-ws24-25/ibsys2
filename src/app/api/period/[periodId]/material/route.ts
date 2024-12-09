@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: { params: { periodId: st
       amount: number,
       periodId: number
     ) => {
-      const existingRequirement = requirement.find((item) => item.materialId === materialId);
+      const existingRequirement = requirement.find((item) => item.materialId === materialId && item.periodId === periodId);
 
       if (existingRequirement) {
         // Wenn ein Eintrag für die MaterialId existiert, summiere den amount auf
@@ -31,6 +31,19 @@ export async function GET(request: Request, { params }: { params: { periodId: st
       }
     };
 
+    const calculateSumKaufteile = (materialId: string, amount: number, periodId: number) => {
+      const material = materials.find(mt => (mt.id === materialId));
+      if (material && material.MaterialsRequired) {
+        for (const part of material.MaterialsRequired) {
+          if (part.requiredMaterialId.includes("K")) {
+            updateMaterialRequirements(part.requiredMaterialId, amount * part.sum, periodId);
+          } else {
+            calculateSumKaufteile(part.requiredMaterialId, amount * part.sum, periodId);
+          }
+        }
+      }
+    };
+
     const requirement: MaterialRequirement[] = [];
     const periodId = Number(params.periodId);
 
@@ -40,6 +53,19 @@ export async function GET(request: Request, { params }: { params: { periodId: st
         MaterialsRequired: true,
       },
     });
+
+    const forecasts = await prisma.forecast.findMany({
+      where: {
+        periodId: Number(params.periodId),
+        forPeriod: {
+          gt: Number(params.periodId),
+        },
+      }
+    });
+
+    for (const forecast of forecasts) {
+      calculateSumKaufteile(forecast.materialId, forecast.amount, forecast.forPeriod);
+    }
 
     // Fetch production plan data from another API
     const productionPlanResponse = await fetch(

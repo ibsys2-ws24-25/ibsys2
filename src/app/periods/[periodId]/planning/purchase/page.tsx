@@ -29,13 +29,13 @@ type PeriodWithRelations = Prisma.PeriodGetPayload<{
     };
 }>;
 
-export default async function HomePage({ params }: { params: { periodId: number }}) {
+export default async function PurchasePartPage({ params }: { params: { periodId: number }}) {
     const period = await getPeriod(params.periodId);
     const purchaseParts = getPurchaseParts(period.Warehouse);
     const prisma = new PrismaClient();
     const orders = await prisma.order.findMany({
         where: {
-            orderPeriod: Number(params.periodId),
+            periodId: Number(params.periodId),
         }
     })
     return (

@@ -27,7 +27,7 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
   const saveAllValues = async () => {
     setIsUpdating(true);
     try {
-      const response = await fetch(`/api/period/${periodId}/order`, {
+      const response = await fetch(`/api/period/${periodId}/orderDecision`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,13 +98,15 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                   </div>
               </div>
             </TableHead>
+            <TableHead>
+              <div>test</div>
+            </TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
           {purchaseParts.map((material) => {
             const materialOrders = orders.filter((order) => order.materialId === material.materialId);
-
             return (
               <TableRow key={material.materialId}>
                   <TableCell>
@@ -133,14 +135,16 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                   <TableCell>
                     <div className="">
                       {materialOrders.length > 0 ? (
-                        <div className="flex justify-center items-center w-full">
+                        <div className="flex flex-col justify-center items-center w-full">
                           {materialOrders.map((order) => (
-                            <><span className="w-1/2 text-center" key={order.orderId}>
-                              {order.amount}
-                            </span>
-                            <span className="w-1/2 text-center" key={order.orderId}>
-                              {Math.round(order.orderPeriod + material.deliveryTime)} / {Math.round(order.orderPeriod + material.deliveryTime + material.variance)}
-                            </span></>
+                            <div key={order.orderId} className="w-full flex items-center">
+                              <span className="w-1/2 text-center">
+                                {order.amount}
+                              </span>
+                              <span className="w-1/2 text-center">
+                                {Math.round(order.orderPeriod + material.deliveryTime)} / {Math.round(order.orderPeriod + material.deliveryTime + material.variance)}
+                              </span>
+                            </div>
                           ))}
                         </div>
                       ) : (
@@ -171,20 +175,20 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                       <span className="flex-1 text-center">ToDO</span>
                     </div>
                   </TableCell>
+                  <TableCell>
+                  <Button
+                    onClick={saveAllValues}
+                    disabled={isUpdating}
+                    className=""
+                  >
+                    {isUpdating ? "Saving..." : "Save"}
+                  </Button>
+                  </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-      <div className="flex w-full justify-center mt-3">
-        <Button
-          onClick={saveAllValues}
-          disabled={isUpdating}
-          className="w-1/4"
-        >
-          {isUpdating ? "Saving..." : "Save All"}
-        </Button>
-      </div>
     </div>
   );
 }

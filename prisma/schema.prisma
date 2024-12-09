@@ -23,6 +23,8 @@ model Material {
   OrderDecision       OrderDecision[]
   AdditionalSale      AdditionalSale[]
   WaitingQueue        WaitingQueue[]
+  Workplaces          WorkplaceMaterial[]
+  ProductionListWorkplace   productionListOfWorkplace[]
 }
 
 model MaterialRequirement {
@@ -44,6 +46,8 @@ model Period {
   OrderDecision  OrderDecision[]
   AdditionalSale AdditionalSale[]
   WaitingQueue   WaitingQueue[]
+  Workplace      Workplace[]
+  ProductionList  productionListOfWorkplace[]
 }
 
 model Warehouse {
@@ -53,6 +57,45 @@ model Warehouse {
   amount     Int
   periodId   Int
   materialId String
+}
+
+model WorkplaceHelper {
+  id       String                @id @unique
+  maxCapacityPerShift Int                @default(2400)
+  setupTime      Float 
+  Materials WorkplaceMaterial[]  @relation // Materials processed at this workplace
+}
+
+model Workplace {
+  id       Int                @id @default(autoincrement())
+  name     String                
+  capacity Int
+  overtime Int?
+  numberOfShifts  Int       @default(1)
+  periodId Int
+  Period       Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+}
+
+model WorkplaceMaterial {
+  workplaceId  String
+  materialId   String
+  capacityRequired Int?    // Capacity required to process this material at this workplace
+  processingTime Float?    // in minutes
+  procurementTime Float   // in minutes
+  Workplace    WorkplaceHelper @relation(fields: [workplaceId], references: [id])
+  Material     Material  @relation(fields: [materialId], references: [id])
+  @@id([workplaceId, materialId])
+}
+
+model productionListOfWorkplace {
+  id      Int       @id @default(autoincrement())
+  periodId  Int     
+  materialId  String
+  quantity    Int
+  priority    Int      @unique
+  Period      Period   @relation(fields: [periodId], references: [id])
+  Material    Material @relation(fields: [materialId], references: [id])
+	@@map("productionList")
 }
 
 model Forecast {
@@ -132,4 +175,5 @@ model WaitingQueue {
   timeneed   Int
   periodId   Int
   materialId String
+  workplaceId Int?
 }

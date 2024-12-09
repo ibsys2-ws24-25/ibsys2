@@ -205,6 +205,40 @@ export async function POST(request: Request) {
                     data: waitinglistEntities,
                 });
             }
+
+            if (results.waitingliststock && results.waitingliststock[0] && results.waitingliststock[0].missingpart) {
+                const waitinglistEntities = [];
+                for (const missingpart of results.waitingliststock[0].missingpart) {
+                    if (missingpart.workplace) {
+                        for (const queue of missingpart.workplace) {
+                            for (const waitinglistElement of queue.waitinglist) {
+                                if (waitinglistElement.$) {
+                                    const material = await prisma.material.findFirst({
+                                        where: { id: {
+                                            endsWith: waitinglistElement.$.item,
+                                        }},
+                                    });
+                                    if (material) {
+                                        waitinglistEntities.push({
+                                            orderId: Number(waitinglistElement.$.order),
+                                            firstBatch: Number(waitinglistElement.$.firstbatch),
+                                            lastBatch: Number(waitinglistElement.$.lastbatch),
+                                            amount: Number(waitinglistElement.$.amount),
+                                            timeneed: Number(waitinglistElement.$.timeNeed),
+                                            periodId: newPeriod.id,
+                                            materialId: material.id,
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                await prisma.waitingQueue.createMany({
+                    data: waitinglistEntities,
+                });
+            }
         }
         
         return NextResponse.json(

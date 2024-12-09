@@ -1,8 +1,7 @@
 import WorktimeView from '@/components/pages/worktime/worktimeView';
 
-
-export default async function HomePage() {
+export default async function HomePage({ params }: { params: { periodId: number }}) {
     return (
-        <WorktimeView/>
+        <WorktimeView periodId={params.periodId}/>
     );
 }

@@ -63,11 +63,13 @@ async function createWorkplaces(periodId: number, workplaceCapacityMap: Record<s
 }
 
 
-export async function calculateTotalCapacity(request: Request, { params }: { params: { periodId: string } }) {
+async function calculateTotalCapacity(request: Request, { params }: { params: { periodId: string } }) {
     const periodId = Number(params.periodId);
 
     try {
-        const response = await fetch(`/api/period/${periodId}/manufactoring-plan/`, { method: "GET" });
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${periodId}/manufactoring-plan/`, {
+            method: "GET",
+        });
         if (!response.ok) throw new Error("Failed to fetch production plan.");
 
         const productionPlan: Record<string, number> = await response.json();
@@ -142,7 +144,7 @@ export async function calculateTotalCapacity(request: Request, { params }: { par
     }
 }
 
-export async function createProductionOrderEntries(request: Request, { params }: { params: { periodId: string } }) {
+async function createProductionOrderEntries(request: Request, { params }: { params: { periodId: string } }) {
     const currentPeriod = Number(params.periodId);
 
     try {
@@ -220,3 +222,6 @@ export async function createProductionOrderEntries(request: Request, { params }:
         await prisma.$disconnect();
       }
   }
+
+export { calculateTotalCapacity as GET };
+export { createProductionOrderEntries as POST };

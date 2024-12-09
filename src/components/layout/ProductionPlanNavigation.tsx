@@ -17,7 +17,7 @@ export default function ProductionPlanNavigation() {
     { href: `/periods/${periodId}/planning/production/1`, label: "Material P1" },
     { href: `/periods/${periodId}/planning/production/2`, label: "Material P2" },
     { href: `/periods/${periodId}/planning/production/3`, label: "Material P3" },
-    { href: `/periods/${periodId}/planning/workplace`, label: "Workplace" },
+    { href: `/periods/${periodId}/planning/worktime`, label: "Workplace" },
     { href: `/periods/${periodId}/planning/purchase`, label: "Purchase Planning" },
   ];
 

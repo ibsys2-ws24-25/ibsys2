@@ -6,15 +6,17 @@ import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "@
 import { PurchaseParts } from "@/lib/prodUtils";
 import { Order, OrderDecision } from "@prisma/client";
 import { useEffect, useState } from "react";
+import { MaterialRequirement } from "@/app/api/period/[periodId]/material/route";
 
 export interface PurchaseTableProps {
     purchaseParts: PurchaseParts[];
     periodId: number;
     orders: Order[];
     orderDecisions: OrderDecision[];
+    requiredMaterials: MaterialRequirement[];
 }
 
-const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions }: PurchaseTableProps) => {
+const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requiredMaterials }: PurchaseTableProps) => {
   const [isUpdatingRow, setIsUpdatingRow] = useState<{ [key: string]: boolean }>({});
   const [inputValues, setInputValues] = useState<{ [key: string]: { amount: number; mode: number } }>({});
 
@@ -123,7 +125,6 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions }: Purc
               </div>
             </TableHead>
             <TableHead>
-              <div>test</div>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -131,6 +132,8 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions }: Purc
         <TableBody>
           {purchaseParts.map((material) => {
             const materialOrders = orders.filter((order) => order.materialId === material.materialId);
+            const requiredMaterialsFiltered = requiredMaterials.filter((reqMaterial) => reqMaterial.materialId === material.materialId);
+            requiredMaterialsFiltered.sort((a, b) => a.periodId - b.periodId);
             return (
               <TableRow key={material.materialId}>
                   <TableCell>
@@ -149,12 +152,17 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions }: Purc
                       {material.warehouseStock}
                   </TableCell>
                   <TableCell>
-                  <div className="flex">
-                    <span className="flex-1 text-center">ToDO</span>
-                    <span className="flex-1 text-center">ToDO</span>
-                    <span className="flex-1 text-center">ToDO</span>
-                    <span className="flex-1 text-center">ToDO</span>
-                  </div>
+                    {requiredMaterialsFiltered.length > 0 ? (
+                      <div className="w-full flex">
+                        {requiredMaterialsFiltered.map((reqMaterial) => (
+                          <span className="w-1/4 text-center" key={reqMaterial.materialId}>
+                            {reqMaterial.amount}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                    <span></span> 
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="">

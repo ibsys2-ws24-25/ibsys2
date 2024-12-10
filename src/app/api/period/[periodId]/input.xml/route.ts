@@ -68,6 +68,27 @@ export async function GET(
     }
     selldirect.up();
 
+    // material orders
+    const materialOrders = await prisma.orderDecision.findMany({
+      where: {
+        periodId: periodId,
+      },
+      orderBy: {
+        materialId: "asc",
+      },
+    });
+
+    const orderlist = doc.ele("orderlist");
+    for (const order of materialOrders) {
+      orderlist
+        .ele("order")
+        .att("article", extractNumbers(order.materialId))
+        .att("quantity", String(order.amount))
+        .att("modus", String(order.mode))
+        .up();
+    }
+    orderlist.up();
+
     // Production Orders
     const productionPlanResponse = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${params.periodId}/manufactoring-plan`,

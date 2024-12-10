@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function UPDATE(request: Request, { params }: { params: { periodId: string } }) {
+export async function PUT(request: Request, { params }: { params: { periodId: string } }) {
     const currentPeriod = Number(params.periodId);
 
     try {

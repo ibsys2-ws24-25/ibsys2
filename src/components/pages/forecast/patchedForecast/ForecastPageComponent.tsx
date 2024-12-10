@@ -1,10 +1,10 @@
 'use client'
 import ForecastForm from "@/components/pages/forecast/patchedForecast/ForecastForm";
-import { ForecastProps } from "@/app/periods/[periodId]/planning/forecast/page";
 import { ForecastProvider } from "@/context/ForecastContext";
 import ProductSafetyStock from "@/components/pages/forecast/patchedForecast/ProductSafetyStock";
 import ProductionRequirement from "@/components/pages/forecast/patchedForecast/ProductionRequirement";
 import AdditionalSaleForm from "@/components/pages/forecast/patchedForecast/AdditionalSaleForm";
+import { ForecastProps } from "@/app/[locale]/periods/[periodId]/planning/forecast/page";
 
 export default function ForecastPage({ periodId, forecasts, prodDecisions, warehouse, additionalSales }: ForecastProps) {
     return(

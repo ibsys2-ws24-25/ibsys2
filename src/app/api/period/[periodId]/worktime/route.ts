@@ -249,7 +249,7 @@ async function createProductionOrderEntries(request: Request, { params }: { para
         await prisma.$disconnect();
       }
   }
-
+/*
 export async function getWorkplaceDetails(request: Request, { params }: { params: { periodId: string } }) {
   const periodId = Number(params.periodId);
 
@@ -287,6 +287,6 @@ export async function getWorkplaceDetails(request: Request, { params }: { params
       await prisma.$disconnect();
   }
 }
+*/
 
-export { calculateTotalCapacity as GET };
-export { createProductionOrderEntries as POST };
+export { calculateTotalCapacity as GET, createProductionOrderEntries as POST };

@@ -9,8 +9,8 @@ export async function GET(
   { params }: { params: { periodId: string } }
 ) {
   const extractNumbers = (materialId: string): string => {
-    const match = materialId.match(/\d+/); // Sucht nach einer oder mehreren Zahlen
-    return match ? match[0] : ""; // Gibt die erste gefundene Zahl zurück oder einen leeren String
+    const match = materialId.match(/\d+/);
+    return match ? match[0] : "";
   };
 
   const periodId = parseInt(params.periodId);
@@ -67,6 +67,34 @@ export async function GET(
         .up();
     }
     selldirect.up();
+
+    // Production Orders
+    const productionPlanResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${params.periodId}/manufactoring-plan`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      }
+    );
+
+    if (!productionPlanResponse.ok) {
+      throw new Error(`Failed to fetch production plan: ${productionPlanResponse.statusText}`);
+    }
+
+    const productionOrders = await productionPlanResponse.json();
+    const productionlist = doc.ele("productionlist");
+    for (const materialId of Object.keys(productionOrders)) {
+      productionlist
+        .ele("production")
+        .att("article", extractNumbers(materialId))
+        .att("quantity", String(productionOrders[materialId]))
+        .up();
+    }
+
+    productionlist.up();
 
     // Rückgabe einer XML-Response
     return new NextResponse(doc.end({ prettyPrint: true }), {

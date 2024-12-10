@@ -5,7 +5,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
   const { t } = await initTranslation(params.locale, ['home']);
   return (
       <div className="mt-10 w-full">
-          <h1 className="text-4xl font-bold text-center mb-8">Bicycle Calculation Tool</h1>
+          <h1 className="text-4xl font-bold text-center mb-8">{ t("title") }</h1>
           <div className="flex flex-col gap-4">
             <LineChartStatistic
               cardTitle={t("combined_profits")}

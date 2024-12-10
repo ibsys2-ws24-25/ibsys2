@@ -1,4 +1,3 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
 import Link from "next/link";
 import {
     Sidebar,
@@ -9,48 +8,27 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
+export interface SidebarProps {
+  applicationTabTitle: string;
+  links: {
+    title: string;
+    url: string;
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  }[];
+  locale: string;
+}
 
-const items = [
-    {
-      title: "Home",
-      url: "/",
-      icon: Home,
-    },
-    {
-      title: "Bill of Materials",
-      url: "/bill-of-materials",
-      icon: Search,
-    },
-    {
-      title: "Periods",
-      url: "/periods",
-      icon: Calendar,
-    },
-    {
-      title: "Reports",
-      url: "/reports",
-      icon: Inbox,
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Settings,
-    },
-]
-  
-  
-
-export default function SidebarComponent() {
+export default function SidebarComponent({ applicationTabTitle, links, locale }: SidebarProps) {
     return (
         <Sidebar>
             <SidebarContent>
                 <SidebarGroup>
-                <SidebarGroupLabel>Application</SidebarGroupLabel>
+                <SidebarGroupLabel>{ applicationTabTitle }</SidebarGroupLabel>
                 <SidebarGroupContent>
                     <SidebarMenu>
-                    {items.map((item) => (
+                    {links.map((item) => (
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton asChild>
                                 <Link href={item.url}>

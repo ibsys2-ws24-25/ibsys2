@@ -111,6 +111,6 @@ export default async function HomePage({ params }: { params: { periodId: number,
             <CardContent>
                 <MaterialTable productionPlan={ productionPlan } defaultStockSetting={ defaultStockSetting.value } periodId={String(params.periodId)} productId={`P${params.productId}`} decisions={decisions} waitingQueue={waitingQueue} forecasts={forecasts} />
             </CardContent>
-        </Card>            
+        </Card>
     );
 }

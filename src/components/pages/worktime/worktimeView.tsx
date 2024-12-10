@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type WorkplaceData = {
-    id: number;
+    name: string;
     capacity: number;
     overtime: number;
     shifts: number;
@@ -27,16 +27,16 @@ export default function WorktimeView({ periodId }: WorktimeViewProps) {
             });
             if (!response.ok) throw new Error("Failed to fetch workplace data.");
 
-            const data: Record<number, { capacity: number; overtime: number; numberOfShifts: number }> = await response.json();
+            const data: Record<string, { capacity: number; overtime: number; numberOfShifts: number }> = await response.json();
 
-            const workplaceArray = Object.entries(data).map(([id, details]) => ({
-                id: Number(id),
+            const formattedData = Object.entries(data).map(([name, details]) => ({
+                name,
                 capacity: details.capacity,
                 overtime: details.overtime,
                 shifts: details.numberOfShifts,
             }));
 
-            return workplaceArray;
+            return formattedData;
 
         } catch (err: unknown) {
             if (err instanceof Error) {
@@ -59,7 +59,12 @@ export default function WorktimeView({ periodId }: WorktimeViewProps) {
         fetchData();
     }, [fetchCapacityCalculation]);
 
-    const headers = Array.from({ length: 15 }, (_, i) => i + 1).filter((num) => num !== 5);
+    const headers = workplaceData.map((workplace) => workplace.name).sort((a, b) => Number(a) - Number(b));
+
+    const workplaceMap = workplaceData.reduce((acc, workplace) => {
+        acc[workplace.name] = workplace;
+        return acc;
+    }, {} as Record<string, WorkplaceData>);
 
     return (
         <div className="overflow-x-auto">
@@ -72,33 +77,31 @@ export default function WorktimeView({ periodId }: WorktimeViewProps) {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Workplaces</TableHead>
-                            {headers.map((number) => (
-                                <TableHead key={number}>{number}</TableHead>
-                            ))}
+                            {headers.map((name) => (
+                                <TableHead key={name}>{name}</TableHead>
+                        ))}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {/* Row for Total Capacity Requirements */}
                         <TableRow>
                             <TableCell>Total capacity requirements</TableCell>
-                            {workplaceData.map((workplace) => (
-                                <TableCell key={workplace.id}>{workplace.capacity}</TableCell>
+                            {headers.map((name) => (
+                                <TableCell key={name}>{workplaceMap[name]?.capacity || 0}</TableCell>
                             ))}
                         </TableRow>
 
-                        {/* Row for Overtime */}
                         <TableRow>
                             <TableCell>Overtime</TableCell>
-                            {workplaceData.map((workplace) => (
-                                <TableCell key={workplace.id}>{workplace.overtime}</TableCell>
+                            {headers.map((name) => (
+                                <TableCell key={name}>{workplaceMap[name]?.overtime || 0}</TableCell>
                             ))}
                         </TableRow>
 
-                        {/* Row for Shifts */}
                         <TableRow>
                             <TableCell>Shift</TableCell>
-                            {workplaceData.map((workplace) => (
-                                <TableCell key={workplace.id}>{workplace.shifts}</TableCell>
+                            {headers.map((name) => (
+                                <TableCell key={name}>{workplaceMap[name]?.shifts || 0}</TableCell>
                             ))}
                         </TableRow>
                     </TableBody>

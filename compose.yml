@@ -1,0 +1,24 @@
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: default
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: 123
+    volumes:
+      - ./compose/data/postgres:/var/lib/postgresql/data
+
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://prisma:123@postgres:5432/default
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres

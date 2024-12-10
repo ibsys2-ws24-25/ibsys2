@@ -56,14 +56,22 @@ export async function GET(
       },
     });
 
+    const additionalSalesSettings = await prisma.setting.findMany({
+      where: {
+        name: {
+          contains: "selldirect",
+        },
+      },
+    });
+
     const selldirect = doc.ele("selldirect");
     for (const additionalSale of additionalSales) {
       selldirect
         .ele("item")
         .att("article", extractNumbers(additionalSale.materialId))
         .att("quantity", String(additionalSale.amount))
-        .att("price", "0.0")
-        .att("penalty", "0.0")
+        .att("price", additionalSalesSettings.find(as => (as.name === "selldirect_price"))?.value || "0.0")
+        .att("penalty", additionalSalesSettings.find(as => (as.name === "selldirect_penalty"))?.value || "0.0")
         .up();
     }
     selldirect.up();

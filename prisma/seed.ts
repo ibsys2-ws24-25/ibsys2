@@ -245,20 +245,26 @@ async function main() {
         { name: "safety_stock_default", value: "30" },
         { name: "planspiel_game", value: "217" },
         { name: "planspiel_group", value: "2" },
+        { name: "selldirect_price", value: "120" },
+        { name: "selldirect_penalty", value: "0" },
     ];
     try {
-        await prisma.setting.createMany({
-            data: settings,
-        });
-    } catch (error: unknown) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            if (error.code === 'P2002') {
-                console.error("Settings already added. Skipping...");
-            } else {
-                console.error("An unexpected error occurred:", error);
-                throw error;
-            }
+      for (const setting of settings) {
+        if (!(await prisma.setting.findUnique({ where: { name: setting.name } }))) {
+          await prisma.setting.create({
+            data: setting,
+          });
         }
+      }
+    } catch (error: unknown) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          console.error("Settings already added. Skipping...");
+        } else {
+          console.error("An unexpected error occurred:", error);
+          throw error;
+        }
+      }
     }
 
     const workplaces = [
@@ -277,10 +283,20 @@ async function main() {
         { id: "14", setupTime: 0.0 },
         { id: "15", setupTime: 30.0 }
     ]
-
-    await prisma.workplaceHelper.createMany({
+    try {
+      await prisma.workplaceHelper.createMany({
         data: workplaces,
-    })
+      })
+    } catch (error: unknown) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          console.error("workplaceHelper already added. Skipping...");
+        } else {
+          console.error("An unexpected error occurred:", error);
+          throw error;
+        }
+      }
+    }
 
     const workplaceMaterials = [
         { workplaceId: "1", materialId: "E49", procurementTime: 6.0 },
@@ -369,9 +385,20 @@ async function main() {
         { workplaceId: "15", materialId: "E26", procurementTime: 3.0 }
     ]    
 
-    await prisma.workplaceMaterial.createMany({
+    try {
+      await prisma.workplaceMaterial.createMany({
         data: workplaceMaterials,
-    })
+      })
+    } catch (error: unknown) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          console.error("workplaceMaterial already added. Skipping...");
+        } else {
+          console.error("An unexpected error occurred:", error);
+          throw error;
+        }
+      }
+    }
 }
 main()
   .then(async () => {

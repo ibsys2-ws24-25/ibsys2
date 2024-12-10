@@ -72,6 +72,9 @@ export async function GET(
     const materialOrders = await prisma.orderDecision.findMany({
       where: {
         periodId: periodId,
+        amount: {
+          gt: 0,
+        },
       },
       orderBy: {
         materialId: "asc",

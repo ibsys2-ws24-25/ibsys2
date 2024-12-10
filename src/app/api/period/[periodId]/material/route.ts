@@ -102,6 +102,18 @@ export async function GET(request: Request, { params }: { params: { periodId: st
       }
     }
 
+    for (const kaufteil of materials.filter((material) => material.id.includes("K"))) {
+      for (const offset of [0, 1, 2, 3]) {
+        if (!requirement.find(rm => (rm.materialId === kaufteil.id && rm.periodId === (periodId + offset)))) {
+          requirement.push({
+            materialId: kaufteil.id,
+            periodId: periodId + offset,
+            amount: 0,
+          });
+        }
+      }
+    }
+
     return NextResponse.json(requirement, { status: 200 });
   } catch (error) {
     console.error('Error fetching production plan decision:', error);

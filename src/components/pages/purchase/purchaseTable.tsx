@@ -75,6 +75,32 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requir
     }
   };
 
+  const calculateEndOfPeriodStock = (
+    warehouseStock: number,
+    grossRequirements: number[],
+    incomingOrders: { amount: number; arrivalPeriod: number }[],
+    periodOffset: number
+  ): number[] => {
+    const stockPerPeriod: number[] = [];
+    let currentStock = warehouseStock;
+    // console.log(incomingOrders)
+    for (let i = 0; i < grossRequirements.length; i++) {
+      const period = Number(periodOffset) + i + 1;
+      // console.log("PERIOD:" + period);
+      // Filter incoming orders for the current period
+      const incomingStock = incomingOrders
+        .filter((order) => order.arrivalPeriod === period)
+        .reduce((sum, order) => sum + order.amount, 0);
+      
+        // console.log(incomingStock);
+      // Calculate stock for the period
+      currentStock = currentStock + incomingStock - grossRequirements[i];
+      stockPerPeriod.push(currentStock);
+    }
+  
+    return stockPerPeriod;
+  };
+
   return (
     <div className="">
       <Table className="border-collapse">
@@ -222,12 +248,57 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requir
                   </TableCell>
                   <TableCell>
                     <div className="flex">
-                      <span className="flex-1 text-center">ToDO</span>
-                      <span className="flex-1 text-center">ToDO</span>
-                      <span className="flex-1 text-center">ToDO</span>
-                      <span className="flex-1 text-center">ToDO</span>
+                      {(() => {
+                        const grossRequirements = requiredMaterials
+                          .filter((reqMaterial) => reqMaterial.materialId === material.materialId)
+                          .sort((a, b) => a.periodId - b.periodId)
+                          .map((reqMaterial) => reqMaterial.amount);
+                        console.log(orderDecisions)
+                        const decisionOrders = orderDecisions
+                          .filter((decision) => decision.materialId === material.materialId)
+                          .map((decision) => {
+                            let deliveryTime;
+                            if (decision.mode === 5) {
+                              deliveryTime = material.deliveryTime + material.variance;
+                            } else if (decision.mode === 4) {
+                              deliveryTime = material.deliveryTime / 2;
+                            } else {
+                              deliveryTime = material.deliveryTime + material.variance;
+                            }
+                      
+                          return {
+                            amount: decision.amount,
+                            arrivalPeriod: Math.round(periodId + deliveryTime), // Calculate arrival period
+                          };
+                        })
+                        
+
+                        const incomingOrders = [
+                          ...orders
+                            .filter((order) => order.materialId === material.materialId)
+                            .map((order) => ({
+                              amount: order.amount,
+                              arrivalPeriod: Math.round(order.orderPeriod + material.deliveryTime),
+                            })),
+                          ...decisionOrders,
+                        ];
+
+                        const endOfPeriodStocks = calculateEndOfPeriodStock(
+                          material.warehouseStock,
+                          grossRequirements,
+                          incomingOrders,
+                          periodId
+                        );
+
+                        return endOfPeriodStocks.map((stock, index) => (
+                          <span key={index} className="flex-1 text-center">
+                            {stock}
+                          </span>
+                        ));
+                      })()}
                     </div>
                   </TableCell>
+
                   <TableCell>
                   <Button
                     onClick={() => saveRowValues(material.materialId)}

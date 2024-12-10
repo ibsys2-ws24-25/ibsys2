@@ -26,7 +26,7 @@ async function updateExistingWorkplaces(periodId: number, workplaceCapacityMap: 
         
         const { overtime, numberOfShifts } = calculateOvertimeAndShifts(calculatedCapacity);
 
-        const workplaceToUpdate = await prisma.workplace.findUnique({
+        const workplaceToUpdate = await prisma.workplace.findFirst({
           where: { name: workplace.name },
         });
 
@@ -74,7 +74,7 @@ async function createWorkplaces(periodId: number, workplaceCapacityMap: Record<s
             })
         );
 
-        console.log("Workplaces created!")
+        // console.log("Workplaces created!")
 
     } catch (error) {
         console.error('Error creating workplaces:', error);
@@ -130,10 +130,10 @@ async function calculateTotalCapacity(request: Request, { params }: { params: { 
                 }
 
                 const materialCapacity = productionQuantity * procurementTime + workplaceHelper.setupTime;
-                console.log(`Material capacity for ${material.id} is ${materialCapacity}`)
+                // console.log(`Material capacity for ${material.id} is ${materialCapacity}`)
 
                 workplaceCapacityMap[workplaceId] = (workplaceCapacityMap[workplaceId] || 0) + materialCapacity;
-                console.log(`current capacity for workplace ${workplaceId} is ${workplaceCapacityMap[workplaceId]}`)
+                // console.log(`current capacity for workplace ${workplaceId} is ${workplaceCapacityMap[workplaceId]}`)
 
             }
         }
@@ -148,7 +148,7 @@ async function calculateTotalCapacity(request: Request, { params }: { params: { 
             include: { Workplace: true },
         });
 
-        console.log(`existingPeriod workplace: ${JSON.stringify(existingPeriod, null, 2)}`);
+        // console.log(`existingPeriod workplace: ${JSON.stringify(existingPeriod, null, 2)}`);
 
         if (!existingPeriod) {
           console.error("No existing period found. Creating workplaces is not allowed in this case.");
@@ -260,7 +260,7 @@ async function createProductionOrderEntries(request: Request, { params }: { para
         await prisma.$disconnect();
       }
   }
-
+/*
 export async function getWorkplaceDetails(request: Request, { params }: { params: { periodId: string } }) {
   const periodId = Number(params.periodId);
 
@@ -298,6 +298,6 @@ export async function getWorkplaceDetails(request: Request, { params }: { params
       await prisma.$disconnect();
   }
 }
+*/
 
-export { calculateTotalCapacity as GET };
-export { createProductionOrderEntries as POST };
+export { calculateTotalCapacity as GET, createProductionOrderEntries as POST };

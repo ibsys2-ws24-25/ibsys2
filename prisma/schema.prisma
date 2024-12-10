@@ -183,7 +183,7 @@ model WaitingQueue {
 
 model Result {
   periodId Int
-  Period   Period @relation(fields: [periodId], references: [id])
+  Period   Period @relation(fields: [periodId], references: [id], onDelete: Cascade)
   type     String
   current  Float
   average  Float

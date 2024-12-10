@@ -110,6 +110,7 @@ export default function LineChartStatistic({
           {loading && <Skeleton className="h-[400px]" />}
           {!loading && (
             <Chart
+              className="overflow-hidden"
               chartType="LineChart"
               data={chartData}
               width="100%"

@@ -43,26 +43,31 @@ export default function LineChartStatistic({
               data[stat.periodId] = {};
             }
             data[stat.periodId][`${type}-current`] = stat.current;
-            data[stat.periodId][`${type}-average`] = stat.average;
+            if (!disableAverage) {
+              data[stat.periodId][`${type}-average`] = stat.average;
+            }
             periods.add(stat.periodId);
           });
         }
 
         const sortedPeriods = Array.from(periods).sort((a, b) => a - b);
-        const chartDataArray: (string | number)[][] = [["Period", ...types.flatMap((type) => [`${type} Current`, `${type} Average`])]];
+        const chartDataArray: (string | number)[][] = [
+          ["Period", ...types.flatMap((type) => [`${type} Current`, ...(disableAverage ? [] : [`${type} Average`])])],
+        ];
 
         sortedPeriods.forEach((periodId) => {
           const row: (string | number)[] = [periodId];
           types.forEach((type) => {
             row.push(data[periodId]?.[`${type}-current`] ?? 0);
-            row.push(data[periodId]?.[`${type}-average`] ?? 0);
+            if (!disableAverage) {
+              row.push(data[periodId]?.[`${type}-average`] ?? 0);
+            }
           });
           chartDataArray.push(row);
         });
 
         setChartData(chartDataArray);
 
-        // Sichtbare Serien initialisieren
         const initialVisibleSeries = Object.fromEntries(chartDataArray[0].slice(1).map((_, index) => [index, true]));
         setVisibleSeries(initialVisibleSeries);
       } catch (err) {
@@ -74,12 +79,12 @@ export default function LineChartStatistic({
     };
 
     fetchData();
-  }, [types]);
+  }, [types, disableAverage]);
 
   const handleLegendClick = (seriesIndex: number) => {
     setVisibleSeries((prev) => ({
       ...prev,
-      [seriesIndex]: !prev[seriesIndex], // Sichtbarkeit toggeln
+      [seriesIndex]: !prev[seriesIndex],
     }));
   };
 
@@ -87,7 +92,6 @@ export default function LineChartStatistic({
     return <p>{error}</p>;
   }
 
-  // Dynamische Optionen für sichtbare Serien
   const seriesOptions = Object.keys(visibleSeries).reduce((acc, key) => {
     acc[parseInt(key, 10)] = visibleSeries[parseInt(key, 10)]
       ? {}
@@ -103,50 +107,44 @@ export default function LineChartStatistic({
           <CardDescription>{cardDescription}</CardDescription>
         </CardHeader>
         <CardContent>
-          {
-            loading && (
-              <Skeleton className="h-[400px]" />
-            )
-          }
-          {
-            !loading && (
-              <Chart
-                chartType="LineChart"
-                data={chartData}
-                width="100%"
-                height="400px"
-                options={{
-                  title: cardTitle,
-                  hAxis: { title: "Periods", format: "0" },
-                  vAxis: { title: "Values" },
-                  legend: {
-                    position: "bottom",
-                    alignment: "center",
-                    maxLines: 2,
-                  },
-                  series: seriesOptions,
-                  colors: types.flatMap(() => ["#0000FF", "#FF0000"]),
-                }}
-                chartEvents={[
-                  {
-                    eventName: "select",
-                    callback: ({ chartWrapper }) => {
-                      if (chartWrapper) {
-                        const chart = chartWrapper.getChart();
-                        const selection = chart.getSelection();
-                        if (selection.length > 0) {
-                          const legendIndex = selection[0].column - 1;
-                          if (legendIndex >= 0) {
-                            handleLegendClick(legendIndex);
-                          }
+          {loading && <Skeleton className="h-[400px]" />}
+          {!loading && (
+            <Chart
+              chartType="LineChart"
+              data={chartData}
+              width="100%"
+              height="400px"
+              options={{
+                title: cardTitle,
+                hAxis: { title: "Periods", format: "0" },
+                vAxis: { title: "Values" },
+                legend: {
+                  position: "bottom",
+                  alignment: "center",
+                  maxLines: 2,
+                },
+                series: seriesOptions,
+                colors: types.flatMap(() => ["#0000FF", ...(disableAverage ? [] : ["#FF0000"])]),
+              }}
+              chartEvents={[
+                {
+                  eventName: "select",
+                  callback: ({ chartWrapper }) => {
+                    if (chartWrapper) {
+                      const chart = chartWrapper.getChart();
+                      const selection = chart.getSelection();
+                      if (selection.length > 0) {
+                        const legendIndex = selection[0].column - 1;
+                        if (legendIndex >= 0) {
+                          handleLegendClick(legendIndex);
                         }
                       }
-                    },
+                    }
                   },
-                ]}
-              />
-            )
-          }
+                },
+              ]}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

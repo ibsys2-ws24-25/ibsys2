@@ -54,7 +54,7 @@ export default function ProductionPlanNavigation() {
                     <PaginationLink className="w-full" href={`/periods/${periodId}/planning/production/3`}>Material P3</PaginationLink>
                 </PaginationItem>
                 <PaginationItem className={`w-full rounded ${(currentIndex === 4) ? "bg-gray-100" : ""}`}>
-                    <PaginationLink className="w-full" href={`/periods/${periodId}/planning/workplace`}>Workplace</PaginationLink>
+                    <PaginationLink className="w-full" href={`/periods/${periodId}/planning/worktime`}>Workplace</PaginationLink>
                 </PaginationItem>
                 <PaginationItem className={`w-full rounded ${(currentIndex === 5) ? "bg-gray-100" : ""}`}>
                     <PaginationLink className="w-full" href={`/periods/${periodId}/planning/purchase`}>Purchase Planning</PaginationLink>

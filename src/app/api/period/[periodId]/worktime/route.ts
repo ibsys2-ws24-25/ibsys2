@@ -10,37 +10,48 @@ function calculateOvertimeAndShifts(capacity: number) {
 }
 
 async function updateExistingWorkplaces(periodId: number, workplaceCapacityMap: Record<string, number>) {
-    try {
-        const existingWorkplaces = await prisma.workplace.findMany({
-            where: { periodId: periodId },
+  try {
+    const existingWorkplaces = await prisma.workplace.findMany({
+      where: { periodId: periodId },
+    });
+
+    if (existingWorkplaces.length === 0) {
+      console.log(`No workplaces found for period ${periodId}.`);
+      return;
+    }
+
+    await Promise.all(
+      existingWorkplaces.map(async (workplace) => {
+        const calculatedCapacity = workplaceCapacityMap[workplace.name] || 0;
+        
+        const { overtime, numberOfShifts } = calculateOvertimeAndShifts(calculatedCapacity);
+
+        const workplaceToUpdate = await prisma.workplace.findUnique({
+          where: { name: workplace.name },
         });
 
-        await Promise.all(
-            existingWorkplaces.map(async (workplace) => {
+        if (!workplaceToUpdate) {
+          console.log(`Workplace with name ${workplace.name} not found.`);
+          return;
+        }
 
-                // console.log(`workplace for updating: ${workplace}`)
+        await prisma.workplace.update({
+          where: { id: workplaceToUpdate.id },
+          data: {
+            capacity: calculatedCapacity,
+            overtime: overtime,
+            numberOfShifts: numberOfShifts,
+          },
+        });
+      })
+    );
 
-                const calculatedCapacity = workplaceCapacityMap[workplace.id] || 0;
-                const { overtime, numberOfShifts } = calculateOvertimeAndShifts(calculatedCapacity);
+    console.log("Workplaces updated successfully!");
 
-                // Update the workplace with the calculated values
-                await prisma.workplace.update({
-                    where: { id: workplace.id },
-                    data: {
-                        capacity: calculatedCapacity,
-                        overtime: overtime,
-                        numberOfShifts: numberOfShifts,
-                    },
-                });
-            })
-        );
-
-        // console.log("Workplaces updated!")
-
-    } catch (error) {
-        console.error('Error updating workplaces for the period:', error);
-        throw new Error('Failed to update workplaces for the period.');
-    }
+  } catch (error) {
+    console.error('Error updating workplaces for the period:', error);
+    throw new Error('Failed to update workplaces for the period.');
+  }
 }
 
 async function createWorkplaces(periodId: number, workplaceCapacityMap: Record<string, number>) {

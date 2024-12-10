@@ -52,7 +52,7 @@ export default function SidebarComponent({ applicationTabTitle, links, locale }:
               {locale === "en" && (
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <Link href="/de" className="flex items-center gap-2">
+                    <a href="/de" className="flex items-center gap-2">
                       <Image
                         src="/static/flags/de.png"
                         alt="German Flag"
@@ -61,14 +61,14 @@ export default function SidebarComponent({ applicationTabTitle, links, locale }:
                         className="rounded-full object-cover"
                       />
                       <span>Switch to German</span>
-                    </Link>
+                    </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
               {locale === "de" && (
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <Link href="/en" className="flex items-center gap-2">
+                    <a href="/en" className="flex items-center gap-2">
                       <Image
                         src="/static/flags/en.png"
                         alt="English Flag"
@@ -77,7 +77,7 @@ export default function SidebarComponent({ applicationTabTitle, links, locale }:
                         className="rounded-full object-cover"
                       />
                       <span>Switch to English</span>
-                    </Link>
+                    </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}

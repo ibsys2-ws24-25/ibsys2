@@ -6,12 +6,7 @@ const prisma = new PrismaClient();
 export async function POST(request: Request, { params }: { params: { periodId: string } }) {
     try {
       const { materialId, amount, orderPeriod, mode} = await request.json();
-      let orderPeriodSet = undefined;
-      if (!orderPeriod) {
-        orderPeriodSet = parseInt(params.periodId);
-      } else {
-        orderPeriodSet = orderPeriod;
-      }
+  
       console.log(`Received data - PeriodID: ${params.periodId}, MaterialID: ${materialId}, Mode: ${mode}, Amount: ${amount}, OrderPeriod: ${orderPeriod}`);
   
       const periodExists = await prisma.period.findUnique({
@@ -23,23 +18,21 @@ export async function POST(request: Request, { params }: { params: { periodId: s
         return NextResponse.json({ error: "Period not found" }, { status: 404 });
       }
   
-      let decision = await prisma.order.findUnique({
+      let decision = await prisma.orderDecision.findUnique({
         where: {
-            orderPeriod_materialId_periodId: {
-                materialId,
-                orderPeriod: orderPeriodSet,
-                periodId: Number(params.periodId),
+          periodId_materialId: {
+              materialId,
+              periodId: Number(params.periodId),
           },
         },
       });
   
       if (decision) {
-        decision = await prisma.order.update({
+        decision = await prisma.orderDecision.update({
           where: {
-            orderPeriod_materialId_periodId: {
-                materialId,
-                orderPeriod: orderPeriodSet,
-                periodId: Number(params.periodId),
+            periodId_materialId: {
+              materialId,
+              periodId: Number(params.periodId),
           },
           },
           data: {
@@ -48,10 +41,9 @@ export async function POST(request: Request, { params }: { params: { periodId: s
           },
         });
       } else {
-        decision = await prisma.order.create({
+        decision = await prisma.orderDecision.create({
           data: {
             materialId,
-            orderPeriod: Number(params.periodId),
             amount,
             mode,
             periodId: Number(params.periodId)
@@ -61,8 +53,8 @@ export async function POST(request: Request, { params }: { params: { periodId: s
   
       return NextResponse.json(decision, { status: 201 });
     } catch (error) {
-      console.error("Error creating or updating order:", error);
-      return NextResponse.json({ error: "Error creating or updating order" }, { status: 500 });
+      console.error("Error creating or updating orderDecision:", error);
+      return NextResponse.json({ error: "Error creating or updating orderDecision" }, { status: 500 });
     } finally {
       await prisma.$disconnect();
     }

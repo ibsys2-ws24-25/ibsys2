@@ -32,6 +32,9 @@ export async function GET(request: Request, { params }: { params: { periodId: st
     const warehouseStocks = await prisma.warehouse.findMany({
       where: { periodId: periodId },
     });
+    const waitingqueue = await prisma.waitingQueue.findMany({
+      where: { periodId: periodId },
+    });
 
     // Helper functions
     const getMaterial = (id: string) => materials.find((m) => m.id === id) || null;
@@ -45,6 +48,11 @@ export async function GET(request: Request, { params }: { params: { periodId: st
         console.warn(`Warehouse stock for material ${materialId} not found.`);
       }
     };
+    const getWaitingQueueSum = (materialId: string) => {
+      return waitingqueue
+        .filter((item) => item.materialId === materialId)
+        .reduce((sum, item) => sum + item.amount, 0);
+    };
 
     // Start processing for each forecast
     const addRequirements = (materialId: string, amount: number) => {
@@ -52,7 +60,9 @@ export async function GET(request: Request, { params }: { params: { periodId: st
       const safetyStock = getSafetyStock(materialId);
       const additionalSaleWish = additionalSaleWishes.find(as => (as.materialId === materialId))?.amount || 0;
       const warehouseStock = getWarehouseStock(materialId);
-      const totalRequirement = amount + safetyStock + additionalSaleWish;
+      const itemQueue = getWaitingQueueSum(materialId);
+
+      const totalRequirement = amount + safetyStock + additionalSaleWish - itemQueue;
       // console.log(`Adding Material ${materialId}`)
       // console.log(`Total Requirement: ${totalRequirement}`);
 

@@ -85,6 +85,11 @@ export default function PeriodCardGrid({ periods }: PeriodTableProps) {
                                     Purchase Parts
                                 </Button>
                             </Link>
+                            <Link href={`/api/period/${period.id}/input.xml`} target="_blank">
+                                <Button className="w-full mt-2">
+                                    Download Input File
+                                </Button>
+                            </Link>
                             <Button
                                 variant="destructive"
                                 className="w-full mt-4"

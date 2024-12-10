@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Result } from '@prisma/client';
 import { parseStringPromise } from 'xml2js';
 
 export async function GET() {
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
                     await prisma.order.createMany({
                         data: ordersToCreate,
                     });
-                    console.log(`${ordersToCreate.length} orders successfully saved to the database.`);
+                    // console.log(`${ordersToCreate.length} orders successfully saved to the database.`);
                 } else {
                     console.warn('No valid orders to save.');
                 }
@@ -267,6 +267,277 @@ export async function POST(request: Request) {
                 await prisma.waitingQueue.createMany({
                     data: waitinglistEntities,
                 });
+            }
+
+            if (results.result && results.result[0]) {
+              const resultsEntities: Result[] = [];
+              const result = results.result[0];
+
+              // console.log(result);
+
+              if (result.normalsale && result.normalsale[0]) {
+                const normalsale = result.normalsale[0];
+                const typePrefix = "normalsale_";
+
+                if (normalsale.salesprice && normalsale.salesprice[0]) {
+                  const salesprice = normalsale.salesprice[0].$;
+
+                  if (salesprice.current && salesprice.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: typePrefix + "capacity",
+                      current: parseFloat(salesprice.current),
+                      average: parseFloat(salesprice.average),
+                    });
+                  }
+                }
+
+                if (normalsale.profit && normalsale.profit[0]) {
+                  const profit = normalsale.profit[0].$;
+
+                  if (profit.current && profit.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: typePrefix + "profit",
+                      current: parseFloat(profit.current),
+                      average: parseFloat(profit.average),
+                    });
+                  }
+                }
+
+                if (normalsale.profitperunit && normalsale.profitperunit[0]) {
+                  const profitperunit = normalsale.profitperunit[0].$;
+
+                  if (profitperunit.current && profitperunit.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: typePrefix + "profitperunit",
+                      current: parseFloat(profitperunit.current),
+                      average: parseFloat(profitperunit.average),
+                    });
+                  }
+                }
+              }
+
+              if (result.directsale && result.directsale[0]) {
+                const directsale = result.directsale[0];
+                const typePrefix = "directsale_";
+
+                if (directsale.profit && directsale.profit[0]) {
+                  const profit = directsale.profit[0].$;
+
+                  if (profit.current && profit.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: typePrefix + "profit",
+                      current: parseFloat(profit.current),
+                      average: parseFloat(profit.average),
+                    });
+                  }
+                }
+
+                if (directsale.contractpenalty && directsale.contractpenalty[0]) {
+                  const contractpenalty = directsale.contractpenalty[0].$;
+
+                  if (contractpenalty.current && contractpenalty.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: typePrefix + "contractpenalty",
+                      current: parseFloat(contractpenalty.current),
+                      average: parseFloat(contractpenalty.average),
+                    });
+                  }
+                }
+              }
+
+              if (result.marketplacesale && result.marketplacesale[0]) {
+                const marketplacesale = result.marketplacesale[0];
+                const typePrefix = "marketplacesale_";
+
+                if (marketplacesale.profit && marketplacesale.profit[0]) {
+                  const profit = marketplacesale.profit[0].$;
+
+                  if (profit.current && profit.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: typePrefix + "profit",
+                      current: parseFloat(profit.current),
+                      average: parseFloat(profit.average),
+                    });
+                  }
+                }
+              }
+
+              if (result.summary && result.summary[0]) {
+                const summary = result.summary[0];
+                const typePrefix = "summary_";
+
+                if (summary.profit && summary.profit[0]) {
+                  const profit = summary.profit[0].$;
+
+                  if (profit.current && profit.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: typePrefix + "profit",
+                      current: parseFloat(profit.current),
+                      average: parseFloat(profit.average),
+                    });
+                  }
+                }
+              }
+
+              if (result.general && result.general[0]) {
+                const general = result.general[0];
+
+                if (general.capacity && general.capacity[0]) {
+                  const capacity = general.capacity[0].$;
+                  if (capacity.current && capacity.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "capacity",
+                      current: parseFloat(capacity.current),
+                      average: parseFloat(capacity.average),
+                    });
+                  }
+                }
+
+                if (general.possiblecapacity && general.possiblecapacity[0]) {
+                  const possiblecapacity = general.possiblecapacity[0].$;
+                  if (possiblecapacity.current && possiblecapacity.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "possiblecapacity",
+                      current: parseFloat(possiblecapacity.current),
+                      average: parseFloat(possiblecapacity.average),
+                    });
+                  }
+                }
+
+                if (general.relpossiblenormalcapacity && general.relpossiblenormalcapacity[0]) {
+                  const relpossiblenormalcapacity = general.relpossiblenormalcapacity[0].$;
+                  if (relpossiblenormalcapacity.current && relpossiblenormalcapacity.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "relpossiblenormalcapacity",
+                      current: parseFloat(relpossiblenormalcapacity.current),
+                      average: parseFloat(relpossiblenormalcapacity.average),
+                    });
+                  }
+                }
+
+                if (general.productivetime && general.productivetime[0]) {
+                  const productivetime = general.productivetime[0].$;
+                  if (productivetime.current && productivetime.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "productivetime",
+                      current: parseFloat(productivetime.current),
+                      average: parseFloat(productivetime.average),
+                    });
+                  }
+                }
+
+                if (general.effiency && general.effiency[0]) {
+                  const effiency = general.effiency[0].$;
+                  if (effiency.current && effiency.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "effiency",
+                      current: parseFloat(effiency.current),
+                      average: parseFloat(effiency.average),
+                    });
+                  }
+                }
+
+                if (general.sellwish && general.sellwish[0]) {
+                  const sellwish = general.sellwish[0].$;
+                  if (sellwish.current && sellwish.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "sellwish",
+                      current: parseFloat(sellwish.current),
+                      average: parseFloat(sellwish.average),
+                    });
+                  }
+                }
+
+                if (general.salesquantity && general.salesquantity[0]) {
+                  const salesquantity = general.salesquantity[0].$;
+                  if (salesquantity.current && salesquantity.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "salesquantity",
+                      current: parseFloat(salesquantity.current),
+                      average: parseFloat(salesquantity.average),
+                    });
+                  }
+                }
+
+                if (general.deliveryreliability && general.deliveryreliability[0]) {
+                  const deliveryreliability = general.deliveryreliability[0].$;
+                  if (deliveryreliability.current && deliveryreliability.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "deliveryreliability",
+                      current: parseFloat(deliveryreliability.current),
+                      average: parseFloat(deliveryreliability.average),
+                    });
+                  }
+                }
+
+                if (general.idletime && general.idletime[0]) {
+                  const idletime = general.idletime[0].$;
+                  if (idletime.current && idletime.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "idletime",
+                      current: parseFloat(idletime.current),
+                      average: parseFloat(idletime.average),
+                    });
+                  }
+                }
+
+                if (general.idletimecosts && general.idletimecosts[0]) {
+                  const idletimecosts = general.idletimecosts[0].$;
+                  if (idletimecosts.current && idletimecosts.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "idletimecosts",
+                      current: parseFloat(idletimecosts.current),
+                      average: parseFloat(idletimecosts.average),
+                    });
+                  }
+                }
+
+                if (general.storevalue && general.storevalue[0]) {
+                  const storevalue = general.storevalue[0].$;
+                  if (storevalue.current && storevalue.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "storevalue",
+                      current: parseFloat(storevalue.current),
+                      average: parseFloat(storevalue.average),
+                    });
+                  }
+                }
+
+                if (general.storagecosts && general.storagecosts[0]) {
+                  const storagecosts = general.storagecosts[0].$;
+                  if (storagecosts.current && storagecosts.average) {
+                    resultsEntities.push({
+                      periodId: newPeriod.id,
+                      type: "storagecosts",
+                      current: parseFloat(storagecosts.current),
+                      average: parseFloat(storagecosts.average),
+                    });
+                  }
+                }
+              }
+
+              console.log(resultsEntities);
+              await prisma.result.createMany({
+                data: resultsEntities,
+              });
             }
         }
         

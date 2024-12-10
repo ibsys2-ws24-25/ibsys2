@@ -1,7 +1,7 @@
 import MaterialTable from '@/components/pages/material/materialTable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getProductionPlan } from '@/lib/prodUtils';
-import { Prisma, ProductionPlanDecision, Setting } from '@prisma/client';
+import { Prisma, PrismaClient, ProductionPlanDecision, Setting } from '@prisma/client';
 import { notFound } from 'next/navigation';
 
 async function getPeriod(id: number): Promise<PeriodWithRelations> {
@@ -86,6 +86,20 @@ export default async function HomePage({ params }: { params: { periodId: number,
 
     const defaultStockSetting = await fetchSetting('safety_stock_default');
 
+    const prisma = new PrismaClient();
+    
+    const waitingQueue = await prisma.waitingQueue.findMany({
+      where: { periodId: Number(params.periodId) },
+    });
+
+    const forecasts = await prisma.forecast.findMany({
+      where: {
+        periodId: Number(params.periodId),
+        forPeriod: Number(params.periodId),
+      }
+    });
+
+    await prisma.$disconnect;
     return (
         <Card>
             <CardHeader>
@@ -95,8 +109,8 @@ export default async function HomePage({ params }: { params: { periodId: number,
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <MaterialTable productionPlan={ productionPlan } defaultStockSetting={ defaultStockSetting.value } periodId={String(params.periodId)} productId={`P${params.productId}`} decisions={decisions} />
+                <MaterialTable productionPlan={ productionPlan } defaultStockSetting={ defaultStockSetting.value } periodId={String(params.periodId)} productId={`P${params.productId}`} decisions={decisions} waitingQueue={waitingQueue} forecasts={forecasts} />
             </CardContent>
-        </Card>            
+        </Card>
     );
 }

@@ -4,48 +4,100 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "@/components/ui/table";
 import { PurchaseParts } from "@/lib/prodUtils";
-import { Order } from "@prisma/client";
-import { useState } from "react";
+import { Order, OrderDecision } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { MaterialRequirement } from "@/app/api/period/[periodId]/material/route";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 
 export interface PurchaseTableProps {
     purchaseParts: PurchaseParts[];
     periodId: number;
     orders: Order[];
+    orderDecisions: OrderDecision[];
+    requiredMaterials: MaterialRequirement[];
 }
 
-const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) => {
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [inputValues, setInputValues] = useState<{ [key: string]: number }>({});
+const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requiredMaterials }: PurchaseTableProps) => {
+  const router = useRouter();
+  const [isUpdatingRow, setIsUpdatingRow] = useState<{ [key: string]: boolean }>({});
+  const [inputValues, setInputValues] = useState<{ [key: string]: { amount: number; mode: number } }>({});
 
-  const handleInputChange = (materialId: string, value: number) => {
+  useEffect(() => {
+    const initialValues: { [key: string]: { amount: number; mode: number } } = {};
+
+    orderDecisions.forEach((decision) => {
+      initialValues[decision.materialId] = {
+        amount: decision.amount,
+        mode: decision.mode,
+      };
+    });
+
+    setInputValues(initialValues);
+  }, [orderDecisions]);
+
+  const handleInputChange = (materialId: string, key: 'amount' | 'mode', value: number) => {
     setInputValues((prev) => ({
       ...prev,
-      [materialId]: value,
+      [materialId]: {
+        ...prev[materialId],
+        [key]: value,
+      },
     }));
   };
 
-  const saveAllValues = async () => {
-    setIsUpdating(true);
+  const saveRowValues = async (materialId: string) => {
+    setIsUpdatingRow((prev) => ({ ...prev, [materialId]: true }));
+    const rowValues = inputValues[materialId] || {};
+
     try {
-      const response = await fetch(`/api/period/${periodId}/order`, {
+      const response = await fetch(`/api/period/${periodId}/orderDecision`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(inputValues),
+        body: JSON.stringify({
+          materialId,
+          amount: rowValues.amount || 0,
+          mode: rowValues.mode || 5,
+          orderPeriod: Number(periodId),
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save values.");
+        throw new Error("Failed to save values for the row.");
       }
 
-      alert("Values saved successfully!");
+      console.log(`Values for material ${materialId} saved successfully!`);
     } catch (error) {
-      console.error("Error saving values:", error);
-      alert("Error saving values. Please try again.");
+      console.error(`Error saving values for material ${materialId}:`, error);
+      console.log(`Error saving values for material ${materialId}. Please try again.`);
     } finally {
-      setIsUpdating(false);
+      setIsUpdatingRow((prev) => ({ ...prev, [materialId]: false }));
+      router.refresh();
     }
+  };
+
+  const calculateEndOfPeriodStock = (
+    warehouseStock: number,
+    grossRequirements: number[],
+    incomingOrders: { amount: number; arrivalPeriod: number }[],
+    periodOffset: number
+  ): number[] => {
+    const stockPerPeriod: number[] = [];
+    let currentStock = warehouseStock;
+    for (let i = 0; i < grossRequirements.length; i++) {
+      const period = Number(periodOffset) + i + 1;
+      // Filter incoming orders for the current period
+      const incomingStock = incomingOrders
+        .filter((order) => order.arrivalPeriod === period)
+        .reduce((sum, order) => sum + order.amount, 0);
+      // Calculate stock for the period
+      currentStock = currentStock + incomingStock - grossRequirements[i];
+      stockPerPeriod.push(currentStock);
+    }
+  
+    return stockPerPeriod;
   };
 
   return (
@@ -98,13 +150,16 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                   </div>
               </div>
             </TableHead>
+            <TableHead>
+            </TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
           {purchaseParts.map((material) => {
             const materialOrders = orders.filter((order) => order.materialId === material.materialId);
-
+            const requiredMaterialsFiltered = requiredMaterials.filter((reqMaterial) => reqMaterial.materialId === material.materialId);
+            requiredMaterialsFiltered.sort((a, b) => a.periodId - b.periodId);
             return (
               <TableRow key={material.materialId}>
                   <TableCell>
@@ -123,24 +178,31 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                       {material.warehouseStock}
                   </TableCell>
                   <TableCell>
-                  <div className="flex">
-                    <span className="flex-1 text-center">ToDO</span>
-                    <span className="flex-1 text-center">ToDO</span>
-                    <span className="flex-1 text-center">ToDO</span>
-                    <span className="flex-1 text-center">ToDO</span>
-                  </div>
+                    {requiredMaterialsFiltered.length > 0 ? (
+                      <div className="w-full flex">
+                        {requiredMaterialsFiltered.map((reqMaterial) => (
+                          <span className="w-1/4 text-center" key={reqMaterial.materialId}>
+                            {reqMaterial.amount}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                    <span></span> 
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="">
                       {materialOrders.length > 0 ? (
-                        <div className="flex justify-center items-center w-full">
+                        <div className="flex flex-col justify-center items-center w-full">
                           {materialOrders.map((order) => (
-                            <><span className="w-1/2 text-center" key={order.orderId}>
-                              {order.amount}
-                            </span>
-                            <span className="w-1/2 text-center" key={order.orderId}>
-                              {Math.round(order.orderPeriod + material.deliveryTime)} / {Math.round(order.orderPeriod + material.deliveryTime + material.variance)}
-                            </span></>
+                            <div key={order.orderId} className="w-full flex items-center">
+                              <span className="w-1/2 text-center">
+                                {order.amount}
+                              </span>
+                              <span className="w-1/2 text-center">
+                                {Math.round(order.orderPeriod + material.deliveryTime)} / {Math.round(order.orderPeriod + material.deliveryTime + material.variance)}
+                              </span>
+                            </div>
                           ))}
                         </div>
                       ) : (
@@ -154,37 +216,100 @@ const PurchaseTable = ({ orders, purchaseParts, periodId }: PurchaseTableProps) 
                         type="number"
                         min={0}
                         step={100}
-                        disabled={ isUpdating }
-                        value={inputValues[material.materialId] || ""}
+                        value={inputValues[material.materialId]?.amount || ""}
                         onChange={(e) =>
-                          handleInputChange(material.materialId, parseInt(e.target.value, 10) || 0)
+                          handleInputChange(material.materialId, "amount", parseInt(e.target.value, 10) || 0)
                         }
-                        className="text-center w-3/4"/>
-                      <span className="flex-1 text-center w 1/4 p-3">ToDO</span>
+                        disabled={isUpdatingRow[material.materialId]}
+                        className="text-center w-2/3  mr-1"
+                      />
+                      <div className="flex-1 text-center w-1/3">
+                        <Select
+                          value={inputValues[material.materialId]?.mode?.toString() || ""}
+                          onValueChange={(value) =>
+                            handleInputChange(material.materialId, "mode", parseInt(value, 10) || 0)
+                          }
+                          disabled={isUpdatingRow[material.materialId]}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Mode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">Normal</SelectItem>
+                            <SelectItem value="4">Express</SelectItem>
+                            <SelectItem value="3">JIT</SelectItem>
+                            <SelectItem value="2">Cheap Provider</SelectItem>
+                            <SelectItem value="1">Special Order</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex">
-                      <span className="flex-1 text-center">ToDO</span>
-                      <span className="flex-1 text-center">ToDO</span>
-                      <span className="flex-1 text-center">ToDO</span>
-                      <span className="flex-1 text-center">ToDO</span>
+                      {(() => {
+                        const grossRequirements = requiredMaterials
+                          .filter((reqMaterial) => reqMaterial.materialId === material.materialId)
+                          .sort((a, b) => a.periodId - b.periodId)
+                          .map((reqMaterial) => reqMaterial.amount);
+
+                        const decisionOrders = orderDecisions
+                          .filter((decision) => decision.materialId === material.materialId)
+                          .map((decision) => {
+                            let deliveryTime;
+                            if (decision.mode === 5) {
+                              deliveryTime = material.deliveryTime + material.variance;
+                            } else if (decision.mode === 4) {
+                              deliveryTime = material.deliveryTime / 2;
+                            } else {
+                              deliveryTime = material.deliveryTime + material.variance;
+                            }
+                          return {
+                            amount: decision.amount,
+                            arrivalPeriod: Math.round(Number(periodId) + Number(deliveryTime)), // Calculate arrival period
+                          };
+                        })
+                        
+
+                        const incomingOrders = [
+                          ...orders
+                            .filter((order) => order.materialId === material.materialId)
+                            .map((order) => ({
+                              amount: order.amount,
+                              arrivalPeriod: Math.round(order.orderPeriod + material.deliveryTime),
+                            })),
+                          ...decisionOrders,
+                        ];
+
+                        const endOfPeriodStocks = calculateEndOfPeriodStock(
+                          material.warehouseStock,
+                          grossRequirements,
+                          incomingOrders,
+                          periodId
+                        );
+
+                        return endOfPeriodStocks.map((stock, index) => (
+                          <span key={index} className="flex-1 text-center">
+                            {stock}
+                          </span>
+                        ));
+                      })()}
                     </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <Button
+                      onClick={() => saveRowValues(material.materialId)}
+                      disabled={isUpdatingRow[material.materialId]}
+                    >
+                      {isUpdatingRow[material.materialId] ? "Saving..." : "Save"}
+                    </Button>
                   </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-      <div className="flex w-full justify-center mt-3">
-        <Button
-          onClick={saveAllValues}
-          disabled={isUpdating}
-          className="w-1/4"
-        >
-          {isUpdating ? "Saving..." : "Save All"}
-        </Button>
-      </div>
     </div>
   );
 }

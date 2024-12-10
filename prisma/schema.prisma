@@ -8,23 +8,23 @@ datasource db {
 }
 
 model Material {
-  id                  String                   @id
-  name                String                   @default("")
-  itemValue           Float
-  defaultStock        Int                      @default(100)
-  MaterialsRequired   MaterialRequirement[]    @relation("RequirementToMaterial") // Materialien, die dieses Material benötigt
-  MaterialsRequiredBy MaterialRequirement[]    @relation("MaterialToRequirements") // Materialien, die dieses Material benötigen
-  Warehouse           Warehouse[]
-  Forecast            Forecast[]
-  ProductionPlan      ProductionPlanDecision[]
-  deliveryTime        Float?
-  variance            Float?
-  Order               Order[]
-  OrderDecision       OrderDecision[]
-  AdditionalSale      AdditionalSale[]
-  WaitingQueue        WaitingQueue[]
-  Workplaces          WorkplaceMaterial[]
-  ProductionListWorkplace   productionListOfWorkplace[]
+  id                      String                      @id
+  name                    String                      @default("")
+  itemValue               Float
+  defaultStock            Int                         @default(100)
+  MaterialsRequired       MaterialRequirement[]       @relation("RequirementToMaterial") // Materialien, die dieses Material benötigt
+  MaterialsRequiredBy     MaterialRequirement[]       @relation("MaterialToRequirements") // Materialien, die dieses Material benötigen
+  Warehouse               Warehouse[]
+  Forecast                Forecast[]
+  ProductionPlan          ProductionPlanDecision[]
+  deliveryTime            Float?
+  variance                Float?
+  Order                   Order[]
+  OrderDecision           OrderDecision[]
+  AdditionalSale          AdditionalSale[]
+  WaitingQueue            WaitingQueue[]
+  Workplaces              WorkplaceMaterial[]
+  ProductionListWorkplace productionListOfWorkplace[]
 }
 
 model MaterialRequirement {
@@ -37,8 +37,8 @@ model MaterialRequirement {
 }
 
 model Period {
-  id             Int                      @id
-  created        DateTime                 @default(now())
+  id             Int                         @id
+  created        DateTime                    @default(now())
   Warehouse      Warehouse[]
   Forecast       Forecast[]
   ProductionPlan ProductionPlanDecision[]
@@ -47,7 +47,8 @@ model Period {
   AdditionalSale AdditionalSale[]
   WaitingQueue   WaitingQueue[]
   Workplace      Workplace[]
-  ProductionList  productionListOfWorkplace[]
+  ProductionList productionListOfWorkplace[]
+  Result         Result[]
 }
 
 model Warehouse {
@@ -60,42 +61,44 @@ model Warehouse {
 }
 
 model WorkplaceHelper {
-  id       String                @id @unique
-  maxCapacityPerShift Int                @default(2400)
-  setupTime      Float 
-  Materials WorkplaceMaterial[]  @relation // Materials processed at this workplace
+  id                  String              @id @unique
+  maxCapacityPerShift Int                 @default(2400)
+  setupTime           Float
+  Materials           WorkplaceMaterial[] @relation // Materials processed at this workplace
 }
 
 model Workplace {
-  id       Int                @id @default(autoincrement())
-  name     String                
-  capacity Int
-  overtime Int?
-  numberOfShifts  Int       @default(1)
-  periodId Int
-  Period       Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  id             Int    @id @default(autoincrement())
+  name           String
+  capacity       Int
+  overtime       Int?
+  numberOfShifts Int    @default(1)
+  periodId       Int
+  Period         Period @relation(fields: [periodId], references: [id], onDelete: Cascade)
 }
 
 model WorkplaceMaterial {
-  workplaceId  String
-  materialId   String
-  capacityRequired Int?    // Capacity required to process this material at this workplace
-  processingTime Float?    // in minutes
-  procurementTime Float   // in minutes
-  Workplace    WorkplaceHelper @relation(fields: [workplaceId], references: [id])
-  Material     Material  @relation(fields: [materialId], references: [id])
+  workplaceId      String
+  materialId       String
+  capacityRequired Int? // Capacity required to process this material at this workplace
+  processingTime   Float? // in minutes
+  procurementTime  Float // in minutes
+  Workplace        WorkplaceHelper @relation(fields: [workplaceId], references: [id])
+  Material         Material        @relation(fields: [materialId], references: [id])
+
   @@id([workplaceId, materialId])
 }
 
 model productionListOfWorkplace {
-  id      Int       @id @default(autoincrement())
-  periodId  Int     
-  materialId  String
-  quantity    Int
-  priority    Int      @unique
-  Period      Period   @relation(fields: [periodId], references: [id])
-  Material    Material @relation(fields: [materialId], references: [id])
-	@@map("productionList")
+  id         Int      @id @default(autoincrement())
+  periodId   Int
+  materialId String
+  quantity   Int
+  priority   Int      @unique
+  Period     Period   @relation(fields: [periodId], references: [id])
+  Material   Material @relation(fields: [materialId], references: [id])
+
+  @@map("productionList")
 }
 
 model Forecast {
@@ -165,15 +168,25 @@ model Setting {
 }
 
 model WaitingQueue {
-  id         Int      @id @default(autoincrement())
-  Period     Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
-  orderId    Int
-  firstBatch Int?
-  lastBatch  Int?
-  Material   Material @relation(fields: [materialId], references: [id])
-  amount     Int
-  timeneed   Int
-  periodId   Int
-  materialId String
+  id          Int      @id @default(autoincrement())
+  Period      Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  orderId     Int
+  firstBatch  Int?
+  lastBatch   Int?
+  Material    Material @relation(fields: [materialId], references: [id])
+  amount      Int
+  timeneed    Int
+  periodId    Int
+  materialId  String
   workplaceId Int?
+}
+
+model Result {
+  periodId Int
+  Period   Period @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  type     String
+  current  Float
+  average  Float
+
+  @@unique([periodId, type])
 }

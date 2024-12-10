@@ -66,7 +66,7 @@ export async function GET(
         .att("penalty", "0.0")
         .up();
     }
-    sellwish.up();
+    selldirect.up();
 
     // Rückgabe einer XML-Response
     return new NextResponse(doc.end({ prettyPrint: true }), {

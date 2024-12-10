@@ -26,7 +26,7 @@ async function updateExistingWorkplaces(periodId: number, workplaceCapacityMap: 
         
         const { overtime, numberOfShifts } = calculateOvertimeAndShifts(calculatedCapacity);
 
-        const workplaceToUpdate = await prisma.workplace.findUnique({
+        const workplaceToUpdate = await prisma.workplace.findFirst({
           where: { name: workplace.name },
         });
 

@@ -98,10 +98,10 @@ export async function POST(request: Request, { params }: { params: { periodId: s
             throw new Error("Production plan is empty or invalid.");
         }
 
-        const productionEntries = Object.entries(productionPlan).map(([materialId, quantity]) => ({
+        const productionEntries = Object.entries(productionPlan).map(([materialId, quantity], index) => ({
             materialId,
             quantity,
-            priority: 0,
+            priority: index + 1,
             periodId,
         }));
 
@@ -109,6 +109,7 @@ export async function POST(request: Request, { params }: { params: { periodId: s
             data: productionEntries,
         });
 
+        return NextResponse.json({ message: "Production orders created successfully." });
     } catch (error: unknown) {
         if (error instanceof Error) {
             console.error("Error creating production order entries:", error.message);

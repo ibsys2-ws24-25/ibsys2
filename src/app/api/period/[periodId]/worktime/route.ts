@@ -250,5 +250,43 @@ async function createProductionOrderEntries(request: Request, { params }: { para
       }
   }
 
+export async function getWorkplaceDetails(request: Request, { params }: { params: { periodId: string } }) {
+  const periodId = Number(params.periodId);
+
+  if (!periodId || isNaN(Number(periodId))) {
+      throw new Error('Invalid period ID' );
+  }
+
+  try {
+      const workplaces = await prisma.workplace.findMany({
+          where: { periodId: Number(periodId) },
+          select: {
+              name: true,
+              overtime: true,
+              numberOfShifts: true,
+          },
+      });
+
+      if (!workplaces || workplaces.length === 0) {
+          throw new Error("No workplaces found for this period");
+      }
+
+      const workplaceDetails = workplaces.reduce((acc, workplace) => {
+        acc[workplace.name] = {
+          overtime: workplace.overtime ?? 0,
+          numberOfShifts: workplace.numberOfShifts,
+        };
+          return acc;
+      }, {} as Record<string, { overtime: number; numberOfShifts: number }>);
+
+      return NextResponse.json(workplaceDetails);
+  } catch (error: unknown) {
+      console.error('Error fetching workplace details:', error);
+      return NextResponse.json({ error: "An unknown error occurred." }, { status: 500 });
+  } finally {
+      await prisma.$disconnect();
+  }
+}
+
 export { calculateTotalCapacity as GET };
 export { createProductionOrderEntries as POST };

@@ -18,6 +18,7 @@ export default function ProductionPlanNavigation() {
     { href: `/periods/${periodId}/planning/production/2`, label: "Material P2" },
     { href: `/periods/${periodId}/planning/production/3`, label: "Material P3" },
     { href: `/periods/${periodId}/planning/worktime`, label: "Workplace" },
+    { href: `/periods/${periodId}/planning/splittingAndReorder`, label: "Splitting" },
     { href: `/periods/${periodId}/planning/purchase`, label: "Purchase Planning" },
   ];
 
@@ -57,6 +58,9 @@ export default function ProductionPlanNavigation() {
                     <PaginationLink className="w-full" href={`/periods/${periodId}/planning/worktime`}>Workplace</PaginationLink>
                 </PaginationItem>
                 <PaginationItem className={`w-full rounded ${(currentIndex === 5) ? "bg-gray-100" : ""}`}>
+                    <PaginationLink className="w-full" href={`/periods/${periodId}/planning/splittingAndReorder`}>Splitting</PaginationLink>
+                </PaginationItem>
+                <PaginationItem className={`w-full rounded ${(currentIndex === 6) ? "bg-gray-100" : ""}`}>
                     <PaginationLink className="w-full" href={`/periods/${periodId}/planning/purchase`}>Purchase Planning</PaginationLink>
                 </PaginationItem>
                 <PaginationItem className="rounded">

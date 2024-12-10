@@ -1,0 +1,18 @@
+{
+  "combined_profits": "Kombinierte Gewinne",
+  "combined_profits_desc": "Hier finden Sie die kombinierten Gewinne aus allen Verkaufsstellen",
+  "profit_streams": "Gewinnströme",
+  "profit_streams_desc": "Hier finden Sie Details zu jedem Gewinnstrom",
+  "store_value": "Lagerwert",
+  "store_value_desc": "Hier können Sie den Wert unseres Lagers sehen",
+  "storage_costs": "Lagerkosten",
+  "storage_costs_desc": "Hier können Sie unsere Lagerkosten über die Zeiträume sehen",
+  "delivery_reliability": "Lieferzuverlässigkeit",
+  "delivery_reliability_desc": "Hier sehen Sie die Lieferzuverlässigkeit pro Zeitraum",
+  "sales": "Verkäufe",
+  "sales_desc": "Hier sehen Sie die Verkäufe pro Zeitraum",
+  "capacity": "Kapazität",
+  "capacity_desc": "Hier sehen Sie die mögliche und die genutzte Kapazität",
+  "efficiency": "Effizienz",
+  "efficiency_desc": "Hier sehen Sie die Effizienz in %"
+}

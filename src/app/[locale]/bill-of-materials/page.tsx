@@ -7,6 +7,7 @@ import {
     CardTitle
 } from '@/components/ui/card';
 import { Material } from "@prisma/client";
+import initTranslation from '@/i18n';
 
 export const metadata: Metadata = {
     title: 'Bill of Materials',
@@ -35,8 +36,9 @@ async function fetchMaterials() {
     return response.json();
 }
 
-export default async function BillOfMaterials() {
+export default async function BillOfMaterials({ params }: { params: { locale: string } }) {
     const materials = await fetchMaterials();
+    const { t } = await initTranslation(params.locale, ['bom']);
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full mt-10">
@@ -48,16 +50,16 @@ export default async function BillOfMaterials() {
                             <CardDescription>{material.name}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <h2 className="font-semibold mt-2">Requires:</h2>
+                            <h2 className="font-semibold mt-2">{t("requires")}:</h2>
                             {material.MaterialsRequired.map((requirement) => (
                                 <p key={requirement.id}>
-                                    {requirement.RequiredMaterial.id}: {requirement.RequiredMaterial.name} - Quantity: {requirement.sum}
+                                    {requirement.RequiredMaterial.id}: {requirement.RequiredMaterial.name} - {t("quantity")}: {requirement.sum}
                                 </p>
                             ))}
-                            <h2 className="font-semibold mt-4">Required by:</h2>
+                            <h2 className="font-semibold mt-4">{t("required_by")}:</h2>
                             {material.MaterialsRequiredBy.map((requirement) => (
                                 <p key={requirement.id}>
-                                    {requirement.Material.id}: {requirement.Material.name} - Quantity: {requirement.sum}
+                                    {requirement.Material.id}: {requirement.Material.name} - {t("quantity")}: {requirement.sum}
                                 </p>
                             ))}
                         </CardContent>

@@ -70,8 +70,8 @@ export async function GET(
         .ele("item")
         .att("article", extractNumbers(additionalSale.materialId))
         .att("quantity", String(additionalSale.amount))
-        .att("price", additionalSalesSettings.find(as => (as.name === "selldirect_price"))?.value || "0.0")
-        .att("penalty", additionalSalesSettings.find(as => (as.name === "selldirect_penalty"))?.value || "0.0")
+        .att("price", additionalSalesSettings.find(as => (as.name === `selldirect_price_${additionalSale.materialId}`))?.value || "0.0")
+        .att("penalty", additionalSalesSettings.find(as => (as.name === `selldirect_penalty_${additionalSale.materialId}`))?.value || "0.0")
         .up();
     }
     selldirect.up();

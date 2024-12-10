@@ -245,8 +245,12 @@ async function main() {
         { name: "safety_stock_default", value: "30" },
         { name: "planspiel_game", value: "217" },
         { name: "planspiel_group", value: "2" },
-        { name: "selldirect_price", value: "120" },
-        { name: "selldirect_penalty", value: "0" },
+        { name: "selldirect_price_P1", value: "120" },
+        { name: "selldirect_penalty_P1", value: "0" },
+        { name: "selldirect_price_P2", value: "120" },
+        { name: "selldirect_penalty_P2", value: "0" },
+        { name: "selldirect_price_P3", value: "120" },
+        { name: "selldirect_penalty_P3", value: "0" },
     ];
     try {
       for (const setting of settings) {
@@ -254,6 +258,13 @@ async function main() {
           await prisma.setting.create({
             data: setting,
           });
+        }
+      }
+
+      const allSettings = await prisma.setting.findMany();
+      for (const setting of allSettings) {
+        if (!settings.find(s => (s.name === setting.name))) {
+          await prisma.setting.delete({ where: { name: setting.name } });
         }
       }
     } catch (error: unknown) {

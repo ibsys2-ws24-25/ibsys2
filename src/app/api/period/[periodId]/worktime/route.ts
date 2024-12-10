@@ -18,7 +18,7 @@ async function updateExistingWorkplaces(periodId: number, workplaceCapacityMap: 
         await Promise.all(
             existingWorkplaces.map(async (workplace) => {
 
-                console.log(`workplace for updating: ${workplace}`)
+                // console.log(`workplace for updating: ${workplace}`)
 
                 const calculatedCapacity = workplaceCapacityMap[workplace.id] || 0;
                 const { overtime, numberOfShifts } = calculateOvertimeAndShifts(calculatedCapacity);
@@ -35,7 +35,7 @@ async function updateExistingWorkplaces(periodId: number, workplaceCapacityMap: 
             })
         );
 
-        console.log("Workplaces updated!")
+        // console.log("Workplaces updated!")
 
     } catch (error) {
         console.error('Error updating workplaces for the period:', error);
@@ -63,7 +63,7 @@ async function createWorkplaces(periodId: number, workplaceCapacityMap: Record<s
             })
         );
 
-        console.log("Workplaces created!")
+        // console.log("Workplaces created!")
 
     } catch (error) {
         console.error('Error creating workplaces:', error);
@@ -119,10 +119,10 @@ async function calculateTotalCapacity(request: Request, { params }: { params: { 
                 }
 
                 const materialCapacity = productionQuantity * procurementTime + workplaceHelper.setupTime;
-                console.log(`Material capacity for ${material.id} is ${materialCapacity}`)
+                // console.log(`Material capacity for ${material.id} is ${materialCapacity}`)
 
                 workplaceCapacityMap[workplaceId] = (workplaceCapacityMap[workplaceId] || 0) + materialCapacity;
-                console.log(`current capacity for workplace ${workplaceId} is ${workplaceCapacityMap[workplaceId]}`)
+                // console.log(`current capacity for workplace ${workplaceId} is ${workplaceCapacityMap[workplaceId]}`)
 
             }
         }
@@ -137,7 +137,7 @@ async function calculateTotalCapacity(request: Request, { params }: { params: { 
             include: { Workplace: true },
         });
 
-        console.log(`existingPeriod workplace: ${JSON.stringify(existingPeriod, null, 2)}`);
+        // console.log(`existingPeriod workplace: ${JSON.stringify(existingPeriod, null, 2)}`);
 
         if (!existingPeriod) {
           console.error("No existing period found. Creating workplaces is not allowed in this case.");

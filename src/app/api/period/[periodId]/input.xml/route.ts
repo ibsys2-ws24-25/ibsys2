@@ -128,6 +128,36 @@ export async function GET(
 
     productionlist.up();
 
+    // Worktime
+    const worktimeResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${params.periodId}/worktime`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      }
+    );
+
+    if (!worktimeResponse.ok) {
+      throw new Error(`Failed to fetch worktime: ${productionPlanResponse.statusText}`);
+    }
+
+    const worktime = await worktimeResponse.json();
+    
+    const workingtimelist = doc.ele("workingtimelist");
+    for (const workplace of Object.keys(worktime)) {
+      workingtimelist
+        .ele("workingtime")
+        .att("station", workplace)
+        .att("shift", String(worktime[workplace]?.numberOfShifts || "0"))
+        .att("overtime", String(worktime[workplace]?.overtime || "0"))
+        .up();
+    }
+
+    workingtimelist.up();
+
     // Rückgabe einer XML-Response
     return new NextResponse(doc.end({ prettyPrint: true }), {
       headers: {

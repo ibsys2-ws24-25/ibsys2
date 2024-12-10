@@ -1,0 +1,18 @@
+{
+  "combined_profits": "Combined Profits",
+  "combined_profits_desc": "Here you can find the combined profits from all sale points",
+  "profit_streams": "Profit streams",
+  "profit_streams_desc": "Here you can find details of each profit stream",
+  "store_value": "Store Value",
+  "store_value_desc": "Here you can see the value of our storage",
+  "storage_costs": "Storage Costs",
+  "storage_costs_desc": "Here you can see our storage costs over the periods",
+  "delivery_reliability": "Delivery Reliability",
+  "delivery_reliability_desc": "Here you can see Delivery Reliability per period",
+  "sales": "Sales",
+  "sales_desc": "Here you can see the sales per period",
+  "capacity": "Capacity",
+  "capacity_desc": "Here you can see the possible capacity and the used capacity",
+  "efficiency": "Efficiency",
+  "efficiency_desc": "Here you can see the efficiency in %"
+}

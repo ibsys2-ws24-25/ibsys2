@@ -17,6 +17,9 @@ async function updateExistingWorkplaces(periodId: number, workplaceCapacityMap: 
 
         await Promise.all(
             existingWorkplaces.map(async (workplace) => {
+
+                console.log(`workplace for updating: ${workplace}`)
+
                 const calculatedCapacity = workplaceCapacityMap[workplace.id] || 0;
                 const { overtime, numberOfShifts } = calculateOvertimeAndShifts(calculatedCapacity);
 
@@ -31,6 +34,9 @@ async function updateExistingWorkplaces(periodId: number, workplaceCapacityMap: 
                 });
             })
         );
+
+        console.log("Workplaces updated!")
+
     } catch (error) {
         console.error('Error updating workplaces for the period:', error);
         throw new Error('Failed to update workplaces for the period.');
@@ -56,6 +62,9 @@ async function createWorkplaces(periodId: number, workplaceCapacityMap: Record<s
                 });
             })
         );
+
+        console.log("Workplaces created!")
+
     } catch (error) {
         console.error('Error creating workplaces:', error);
         throw new Error('Failed to create new workplaces.');
@@ -110,7 +119,11 @@ async function calculateTotalCapacity(request: Request, { params }: { params: { 
                 }
 
                 const materialCapacity = productionQuantity * procurementTime + workplaceHelper.setupTime;
+                console.log(`Material capacity for ${material.id} is ${materialCapacity}`)
+
                 workplaceCapacityMap[workplaceId] = (workplaceCapacityMap[workplaceId] || 0) + materialCapacity;
+                console.log(`current capacity for workplace ${workplaceId} is ${workplaceCapacityMap[workplaceId]}`)
+
             }
         }
 
@@ -124,13 +137,27 @@ async function calculateTotalCapacity(request: Request, { params }: { params: { 
             include: { Workplace: true },
         });
 
-        if (existingPeriod) {
+        console.log(`existingPeriod workplace: ${JSON.stringify(existingPeriod, null, 2)}`);
+
+        if (!existingPeriod) {
+          console.error("No existing period found. Creating workplaces is not allowed in this case.");
+          throw new Error("Cannot proceed: No existing period found.");
+      }
+
+        if (existingPeriod.Workplace && existingPeriod.Workplace.length > 0) {
             await updateExistingWorkplaces(periodId, workplaceCapacityMap);
         } else {
             await createWorkplaces(periodId, workplaceCapacityMap);
         }
 
-        return NextResponse.json(workplaceCapacityMap);
+        const result = Object.keys(workplaceCapacityMap).reduce((acc, workplaceId) => {
+          const capacity = workplaceCapacityMap[workplaceId];
+          const { overtime, numberOfShifts } = calculateOvertimeAndShifts(capacity);
+          acc[workplaceId] = { capacity, overtime, numberOfShifts };
+          return acc;
+      }, {} as Record<string, { capacity: number; overtime: number; numberOfShifts: number }>);
+
+      return NextResponse.json(result);
     } catch (error: unknown) {
         if (error instanceof Error) {
             console.error("Error calculating total capacity:", error.message);

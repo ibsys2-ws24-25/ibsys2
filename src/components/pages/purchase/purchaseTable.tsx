@@ -7,6 +7,7 @@ import { PurchaseParts } from "@/lib/prodUtils";
 import { Order, OrderDecision } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { MaterialRequirement } from "@/app/api/period/[periodId]/material/route";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export interface PurchaseTableProps {
     purchaseParts: PurchaseParts[];
@@ -195,16 +196,28 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requir
                           handleInputChange(material.materialId, "amount", parseInt(e.target.value, 10) || 0)
                         }
                         disabled={isUpdatingRow[material.materialId]}
-                        className="text-center w-2/3  mr-1"/>
-                      <Input
-                        type="number"
-                        value={inputValues[material.materialId]?.mode || ""}
-                        onChange={(e) =>
-                          handleInputChange(material.materialId, "mode", parseInt(e.target.value, 10) || 0)
-                        }
-                        disabled={isUpdatingRow[material.materialId]}
-                        className="flex-1 text-center w 1/3 p-3"
+                        className="text-center w-2/3  mr-1"
                       />
+                      <div className="flex-1 text-center w-1/3">
+                        <Select
+                          value={inputValues[material.materialId]?.mode?.toString() || ""}
+                          onValueChange={(value) =>
+                            handleInputChange(material.materialId, "mode", parseInt(value, 10) || 0)
+                          }
+                          disabled={isUpdatingRow[material.materialId]}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Mode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">Normal</SelectItem>
+                            <SelectItem value="4">Express</SelectItem>
+                            <SelectItem value="3">JIT</SelectItem>
+                            <SelectItem value="2">Cheap Provider</SelectItem>
+                            <SelectItem value="1">Special Order</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>

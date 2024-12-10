@@ -8,6 +8,7 @@ import { Order, OrderDecision } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { MaterialRequirement } from "@/app/api/period/[periodId]/material/route";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 
 export interface PurchaseTableProps {
     purchaseParts: PurchaseParts[];
@@ -18,6 +19,7 @@ export interface PurchaseTableProps {
 }
 
 const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requiredMaterials }: PurchaseTableProps) => {
+  const router = useRouter();
   const [isUpdatingRow, setIsUpdatingRow] = useState<{ [key: string]: boolean }>({});
   const [inputValues, setInputValues] = useState<{ [key: string]: { amount: number; mode: number } }>({});
 
@@ -57,7 +59,7 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requir
         body: JSON.stringify({
           materialId,
           amount: rowValues.amount || 0,
-          mode: rowValues.mode || 0,
+          mode: rowValues.mode || 5,
           orderPeriod: Number(periodId),
         }),
       });
@@ -72,6 +74,7 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requir
       console.log(`Error saving values for material ${materialId}. Please try again.`);
     } finally {
       setIsUpdatingRow((prev) => ({ ...prev, [materialId]: false }));
+      router.refresh();
     }
   };
 
@@ -83,16 +86,12 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requir
   ): number[] => {
     const stockPerPeriod: number[] = [];
     let currentStock = warehouseStock;
-    // console.log(incomingOrders)
     for (let i = 0; i < grossRequirements.length; i++) {
       const period = Number(periodOffset) + i + 1;
-      // console.log("PERIOD:" + period);
       // Filter incoming orders for the current period
       const incomingStock = incomingOrders
         .filter((order) => order.arrivalPeriod === period)
         .reduce((sum, order) => sum + order.amount, 0);
-      
-        // console.log(incomingStock);
       // Calculate stock for the period
       currentStock = currentStock + incomingStock - grossRequirements[i];
       stockPerPeriod.push(currentStock);
@@ -253,7 +252,7 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requir
                           .filter((reqMaterial) => reqMaterial.materialId === material.materialId)
                           .sort((a, b) => a.periodId - b.periodId)
                           .map((reqMaterial) => reqMaterial.amount);
-                        console.log(orderDecisions)
+
                         const decisionOrders = orderDecisions
                           .filter((decision) => decision.materialId === material.materialId)
                           .map((decision) => {
@@ -265,10 +264,9 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requir
                             } else {
                               deliveryTime = material.deliveryTime + material.variance;
                             }
-                      
                           return {
                             amount: decision.amount,
-                            arrivalPeriod: Math.round(periodId + deliveryTime), // Calculate arrival period
+                            arrivalPeriod: Math.round(Number(periodId) + Number(deliveryTime)), // Calculate arrival period
                           };
                         })
                         
@@ -300,12 +298,12 @@ const PurchaseTable = ({ orders, purchaseParts, periodId, orderDecisions, requir
                   </TableCell>
 
                   <TableCell>
-                  <Button
-                    onClick={() => saveRowValues(material.materialId)}
-                    disabled={isUpdatingRow[material.materialId]}
-                  >
-                    {isUpdatingRow[material.materialId] ? "Saving..." : "Save"}
-                  </Button>
+                    <Button
+                      onClick={() => saveRowValues(material.materialId)}
+                      disabled={isUpdatingRow[material.materialId]}
+                    >
+                      {isUpdatingRow[material.materialId] ? "Saving..." : "Save"}
+                    </Button>
                   </TableCell>
               </TableRow>
             );

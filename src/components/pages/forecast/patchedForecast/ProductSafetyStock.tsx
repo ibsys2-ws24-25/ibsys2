@@ -14,10 +14,10 @@ export default function ProductSafetyStock({ periodId }: { periodId: number }) {
             <TableHeader>
                 <TableRow>
                     <TableHead className="w-[130px]">Product</TableHead>
-                    <TableHead>Period {periodId}</TableHead>
                     <TableHead>Period {periodId + 1}</TableHead>
                     <TableHead>Period {periodId + 2}</TableHead>
                     <TableHead>Period {periodId + 3}</TableHead>
+                    <TableHead>Period {periodId + 4}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>

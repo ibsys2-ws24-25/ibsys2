@@ -80,6 +80,11 @@ export default function PeriodCardGrid({ periods }: PeriodTableProps) {
                                     Plan Worktime
                                 </Button>
                             </Link>
+                            <Link href={`/periods/${period.id}/planning/reorderProduction`}>
+                                <Button variant="outline" className="w-full mt-2">
+                                    Reorder Production Orders
+                                </Button>
+                            </Link>
                             <Link href={`/periods/${period.id}/planning/purchase`}>
                                 <Button variant="outline" className="w-full mt-1">
                                     Purchase Parts

@@ -17,11 +17,11 @@ type ProductionOrder = {
   priority: number;
 };
 
-type SplittingViewProps = {
+type ReorderViewProps = {
   periodId: number;
 };
 
-export default function SplittingView({ periodId }: SplittingViewProps) {
+export default function ReorderView({ periodId }: ReorderViewProps) {
   const [orders, setOrders] = useState<ProductionOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export default function SplittingView({ periodId }: SplittingViewProps) {
   useEffect(() => {
     const fetchOrCreateOrders = async () => {
       try {
-        let response = await fetch(`/api/period/${periodId}/splitting/`, {
+        let response = await fetch(`/api/period/${periodId}/reorderProduction/`, {
           method: "GET",
         });
 
@@ -42,7 +42,7 @@ export default function SplittingView({ periodId }: SplittingViewProps) {
           }
         }
 
-        response = await fetch(`/api/period/${periodId}/splitting/`, {
+        response = await fetch(`/api/period/${periodId}/reorderProduction/`, {
           method: "POST",
         });
 
@@ -66,15 +66,44 @@ export default function SplittingView({ periodId }: SplittingViewProps) {
     fetchOrCreateOrders();
   }, [periodId]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-
+  
     if (active.id !== over?.id) {
       const oldIndex = orders.findIndex((order) => order.id === active.id);
       const newIndex = orders.findIndex((order) => order.id === over?.id);
-      setOrders((prevOrders) => arrayMove(prevOrders, oldIndex, newIndex));
+  
+      const reorderedOrders = arrayMove(orders, oldIndex, newIndex);
+  
+      const updatedOrders = reorderedOrders.map((order, index) => ({
+        ...order,
+        priority: index + 1,
+      }));
+  
+      setOrders(updatedOrders);
+  
+      try {
+        const response = await fetch(`/api/period/${periodId}/reorderProduction/`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productionOrders: updatedOrders.map(({ id, priority }) => ({ id, priority })),
+          }),
+        });
+  
+        if (!response.ok) {
+          console.error("Failed to update priorities on the backend.");
+          setOrders(orders);
+        }
+      } catch (error) {
+        console.error("Error updating priorities on the backend:", error);
+        setOrders(orders);
+      }
     }
   };
+  
 
   const splitQuantity = (index: number, splitAmount: number) => {
     setOrders((prevOrders) => {

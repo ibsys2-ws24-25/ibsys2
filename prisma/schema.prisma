@@ -94,7 +94,7 @@ model productionListOfWorkplace {
   periodId   Int
   materialId String
   quantity   Int
-  priority   Int      @unique
+  priority   Int
   Period     Period   @relation(fields: [periodId], references: [id])
   Material   Material @relation(fields: [materialId], references: [id])
 

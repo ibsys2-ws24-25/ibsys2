@@ -3,11 +3,12 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function PUT(request: Request, { params }: { params: { periodId: string } }) {
-    const currentPeriod = Number(params.periodId);
-
+export async function PUT(request: Request) {
+  
     try {
         const { productionOrders } = await request.json();
+
+        console.log(productionOrders)
     
         if (!Array.isArray(productionOrders)) {
           return NextResponse.json(
@@ -15,64 +16,26 @@ export async function PUT(request: Request, { params }: { params: { periodId: st
             { status: 400 }
           );
         }
-    
-        const prioritySet = new Set<number>();
-        for (const order of productionOrders) {
-          if (prioritySet.has(order.priority)) {
-            return NextResponse.json(
-              { error: `Duplicate priority detected: ${order.priority}` },
-              { status: 400 }
-            );
-          }
-          prioritySet.add(order.priority);
-        }
-    
-        const validMaterials = await prisma.material.findMany({
-          where: { id: { in: productionOrders.map((o) => o.materialId) } },
-        });
-        const validMaterialIds = new Set(validMaterials.map((m) => m.id));
-    
-        for (const order of productionOrders) {
-          if (!validMaterialIds.has(order.materialId)) {
-            return NextResponse.json(
-              { error: `Invalid materialId: ${order.materialId}` },
-              { status: 400 }
-            );
-          }
-        }
+
+        const updatedOrders = productionOrders.map((order, index) => ({
+            ...order,
+            priority: index + 1,
+          }));
     
         await prisma.$transaction(async (tx) => {
-          for (const order of productionOrders) {
-            const { id, materialId, quantity, priority } = order;
+          const updatePromises = updatedOrders.map((order) => {
+            return tx.productionListOfWorkplace.update({
+              where: { id: order.id },
+              data: { priority: order.priority },
+            });
+          });
     
-            if (!materialId || quantity <= 0 || priority <= 0) {
-              throw new Error(`Invalid data for production order: ${JSON.stringify(order)}`);
-            }
-    
-            if (id > 0) {
-              await tx.productionListOfWorkplace.update({
-                where: { id },
-                data: {
-                  quantity,
-                  priority,
-                },
-              });
-            } else {
-              await tx.productionListOfWorkplace.create({
-                data: {
-                  materialId,
-                  quantity,
-                  priority,
-                  periodId: currentPeriod,
-                },
-              });
-            }
-          }
+          await Promise.all(updatePromises);
         });
     
-        return NextResponse.json({ message: "Production orders updated successfully." });
+        return NextResponse.json({ message: "Priorities updated successfully." });
       } catch (error) {
-        console.error("Error updating production orders:", error);
+        console.error("Error updating priorities:", error);
         return NextResponse.json(
           { error: error instanceof Error ? error.message : "Unknown error occurred." },
           { status: 500 }
@@ -81,6 +44,7 @@ export async function PUT(request: Request, { params }: { params: { periodId: st
         await prisma.$disconnect();
       }
   }
+  
 
 export async function POST(request: Request, { params }: { params: { periodId: string } }) {
     const periodId = Number(params.periodId);

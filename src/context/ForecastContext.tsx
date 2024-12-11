@@ -97,7 +97,7 @@ export const ForecastProvider = ({
         setLocalProdDecisions((prevDecisions) => {
             const decisionExists = prevDecisions.some(
                 (decision) =>
-                    decision.periodId === periodId &&
+                    decision.forPeriod === periodId &&
                     decision.productId === materialId &&
                     decision.materialId === materialId
             );
@@ -105,7 +105,7 @@ export const ForecastProvider = ({
             if (decisionExists) {
                 // Aktualisiere vorhandene Entscheidung
                 return prevDecisions.map((decision) =>
-                    decision.periodId === periodId &&
+                    decision.forPeriod === periodId &&
                     decision.materialId === materialId &&
                     decision.materialId === materialId
                         ? { ...decision, safetyStock: value }

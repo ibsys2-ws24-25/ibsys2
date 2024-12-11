@@ -72,7 +72,7 @@ export default function LineChartStatistic({
         setVisibleSeries(initialVisibleSeries);
       } catch (err) {
         console.error(err);
-        setError("Error fetching chart data.");
+        setError("No data available yet! Please upload at least one period.");
       } finally {
         setLoading(false);
       }

@@ -102,7 +102,7 @@ export async function GET(
 
     // Production Orders
     const productionPlanResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${params.periodId}/manufactoring-plan`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${params.periodId}/reorderProduction`,
       {
         method: 'GET',
         headers: {
@@ -118,11 +118,12 @@ export async function GET(
 
     const productionOrders = await productionPlanResponse.json();
     const productionlist = doc.ele("productionlist");
-    for (const materialId of Object.keys(productionOrders)) {
+    for (const material of productionOrders) {
+      console.log(material);
       productionlist
         .ele("production")
-        .att("article", extractNumbers(materialId))
-        .att("quantity", String(productionOrders[materialId]))
+        .att("article", extractNumbers(material.materialId))
+        .att("quantity", String(material.quantity))
         .up();
     }
 

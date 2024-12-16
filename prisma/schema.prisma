@@ -95,7 +95,7 @@ model productionListOfWorkplace {
   materialId String
   quantity   Int
   priority   Int
-  Period     Period   @relation(fields: [periodId], references: [id])
+  Period     Period   @relation(fields: [periodId], references: [id], onDelete: Cascade)
   Material   Material @relation(fields: [materialId], references: [id])
 
   @@map("productionList")

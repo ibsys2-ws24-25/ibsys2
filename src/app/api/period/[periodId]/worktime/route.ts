@@ -4,9 +4,21 @@ import { NextResponse } from 'next/server';
 const prisma = new PrismaClient();
 
 function calculateOvertimeAndShifts(capacity: number) {
-    const overtime = capacity > 2400 ? Math.floor((capacity - 2400) / 5) : 0;
-    const numberOfShifts = capacity >= 3600 ? 2 : 1;
-    return { overtime, numberOfShifts };
+  let numberOfShifts = 1;
+  let overtime = 0;
+
+  if (capacity > 2400) {
+    const maxCapacityWithOvertime = 2400 + 1200;
+
+    if (capacity > maxCapacityWithOvertime) {
+      numberOfShifts = 2;
+      overtime = Math.max(0, Math.floor((capacity - 4800) / 5));
+    } else {
+      overtime = Math.floor((capacity - 2400) / 5);
+    }
+  }
+
+  return { overtime, numberOfShifts };
 }
 
 async function updateExistingWorkplaces(periodId: number, workplaceCapacityMap: Record<string, number>) {

@@ -44,12 +44,22 @@ export async function PUT(request: Request) {
         await prisma.$disconnect();
       }
   }
-  
 
-export async function POST(request: Request, { params }: { params: { periodId: string } }) {
+  export async function POST(request: Request, { params }: { params: { periodId: string } }) {
     const periodId = Number(params.periodId);
 
-    try{
+    try {
+        const existingOrdersCount = await prisma.productionListOfWorkplace.count({
+            where: { periodId },
+        });
+
+        if (existingOrdersCount > 0) {
+            console.log("Production orders already exist:", existingOrdersCount);
+            const existingOrders = await prisma.productionListOfWorkplace.findMany({
+                where: { periodId },
+            });
+            return NextResponse.json(existingOrders, { status: 200 });
+        }
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/period/${periodId}/manufactoring-plan/`, {
             method: "GET",
@@ -73,19 +83,24 @@ export async function POST(request: Request, { params }: { params: { periodId: s
             data: productionEntries,
         });
 
-        return NextResponse.json({ message: "Production orders created successfully." });
+        const newOrders = await prisma.productionListOfWorkplace.findMany({
+            where: { periodId },
+        });
+
+        return NextResponse.json(newOrders, { status: 201 });
     } catch (error: unknown) {
         if (error instanceof Error) {
             console.error("Error creating production order entries:", error.message);
             return NextResponse.json({ error: error.message }, { status: 500 });
         } else {
-            console.error("Unknown creating production order entrie:", error);
+            console.error("Unknown error creating production order entries:", error);
             return NextResponse.json({ error: "An unknown error occurred." }, { status: 500 });
         }
     } finally {
         await prisma.$disconnect();
     }
 }
+
 
 export async function GET(request: Request, { params }: { params: { periodId: string } }) {
     const periodId = Number(params.periodId);
@@ -96,10 +111,7 @@ export async function GET(request: Request, { params }: { params: { periodId: st
         });
 
         if (!productionOrders || productionOrders.length === 0) {
-            return NextResponse.json(
-                { error: "No production orders found for the given period." },
-                { status: 404 }
-            );
+            throw new Error("No production orders found for the given period!");
         }
 
         return NextResponse.json(productionOrders, { status: 200 });

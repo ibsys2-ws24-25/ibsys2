@@ -27,7 +27,7 @@ const MaterialTable = ({ productionPlan, defaultStockSetting, periodId, productI
     const [productionPlanInit, setProductionPlanInit] = useState<boolean>(true);
     const [fetchedProductionPlan, setFetchedProductionPlan] = useState<Map<string, number> | undefined>(undefined);
     const [safetyStockInputValues, setSafetyStockInputValues] = useState<SafetyStockInputValue[]>(
-        decisions.map((decision) => ({ materialId: decision.materialId, value: decision.safetyStock }))
+        decisions.filter(dc => (dc.forPeriod === Number(periodId))).map((decision) => ({ materialId: decision.materialId, value: decision.safetyStock }))
     );
 
     const getSafetyStockValue = (materialId: string): number => {
